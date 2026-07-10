@@ -3,412 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Para «Añadir a pantalla de inicio» en iPhone: se abre a pantalla completa como una app -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Signos Rx">
-<title>Banco de signos radiológicos</title>
+<meta name="apple-mobile-web-app-title" content="Radiomática">
+<title>Radiomática — repaso móvil</title>
 <style>
   :root{
     --tinta:#1a2238; --hueso:#f3f1ea; --papel:#fbfaf6; --ambar:#c4602a;
-    --verde:#2f6b4f; --rojo:#a33a3a; --gris:#7a7a72; --linea:#d9d5c8; --tapado:#e7e3d6;
+    --verde:#2f6b4f; --gris:#7a7a72; --linea:#d9d5c8;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    background:var(--hueso);color:var(--tinta);line-height:1.5;-webkit-font-smoothing:antialiased;}
-  header{border-bottom:1.5px solid var(--tinta);padding:18px 24px;
-    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
-  header h1{font-size:21px;font-weight:600}
-  header .sub{font-size:12px;color:var(--gris);letter-spacing:.04em;text-transform:uppercase}
-  header a{color:var(--ambar)}
-  .wrap{max-width:860px;margin:0 auto;padding:24px}
-  .barra{display:flex;gap:14px;flex-wrap:wrap;align-items:center;
-    padding:12px 0;border-bottom:1px solid var(--linea);margin-bottom:20px;font-size:13px;}
-  .barra label{color:var(--gris);margin-right:4px}
-  select{font-family:inherit;font-size:13px;border:1px solid var(--linea);border-radius:5px;
-    padding:5px 8px;background:var(--papel);color:var(--tinta);}
-  .chk{display:flex;align-items:center;gap:5px;color:var(--gris)}
-  .progreso{margin-left:auto;font-size:12px;color:var(--gris)}
-  .progreso b{color:var(--tinta)}
-  .btn{font-family:inherit;font-size:15px;border:1.5px solid var(--tinta);background:var(--tinta);
-    color:var(--hueso);padding:10px 22px;border-radius:6px;cursor:pointer;transition:.15s;}
-  .btn:hover{background:transparent;color:var(--tinta)}
-  .btn.sec{background:transparent;color:var(--tinta)}
-  .btn.sec:hover{background:var(--tinta);color:var(--hueso)}
-  .btn.rev{border-color:var(--ambar);background:var(--ambar);color:#fff}
-  .btn.rev:hover{background:#a64e1f;border-color:#a64e1f}
-  .btn.peq{font-size:12px;padding:5px 12px}
-  .carta{background:var(--papel);border:1px solid var(--linea);border-radius:10px;padding:26px;min-height:250px}
-  .etq{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);margin-bottom:10px}
-  .etq .chip{display:inline-block;border:1px solid var(--linea);border-radius:20px;padding:1px 10px;margin-left:6px;text-transform:none;letter-spacing:0}
-  .pregunta{font-size:20px;font-weight:600;margin-bottom:16px}
-  .respuesta{border-top:1px dashed var(--linea);padding-top:16px;margin-top:6px}
-  .respuesta .b{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--gris)}
-  .respuesta p{font-size:15px;margin:3px 0 14px}
-  .tapado{background:var(--tapado);border:1px dashed #c3bda9;border-radius:8px;
-    padding:20px;text-align:center;color:#8a8470;font-size:14px}
-  .acciones{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center}
-  .marca{font-size:13px;color:var(--gris);margin-left:auto}
-  .nav{display:flex;justify-content:space-between;margin-top:20px}
-  .atajos{text-align:center;font-size:11px;color:var(--gris);margin-top:12px}
-  .atajos b{color:var(--tinta)}
-  table.lista{width:100%;border-collapse:collapse;font-size:13px;background:var(--papel)}
-  table.lista th{font-size:11px;color:var(--gris);text-align:left;padding:6px 8px;border-bottom:1px solid var(--tinta)}
-  table.lista td{padding:6px 8px;border-bottom:1px solid var(--linea);vertical-align:top}
-  table.lista td:first-child{font-weight:600;white-space:nowrap}
-  .rep{color:var(--ambar);font-weight:700}
-  .oculto{display:none}
-  .aviso{font-size:12px;color:var(--gris);margin-top:24px;border-top:1px solid var(--linea);padding-top:12px;line-height:1.6}
+    background:var(--hueso);color:var(--tinta);line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;}
+  header{border-bottom:1.5px solid var(--tinta);padding:26px 22px 20px;text-align:center}
+  header h1{font-size:26px;font-weight:600;letter-spacing:-.01em}
+  header .sub{font-size:13px;color:var(--gris);margin-top:4px}
+  .wrap{max-width:640px;margin:0 auto;padding:24px 20px}
+  a.card{display:block;text-decoration:none;color:var(--tinta);background:var(--papel);
+    border:1px solid var(--linea);border-radius:12px;padding:22px;margin-bottom:16px;transition:.15s;border-left:3px solid var(--ambar)}
+  a.card:active,a.card:hover{border-color:var(--ambar);box-shadow:0 6px 18px rgba(26,34,56,.08)}
+  a.card .emoji{font-size:26px;float:right;opacity:.85}
+  a.card h2{font-size:19px;margin-bottom:4px}
+  a.card p{font-size:14px;color:var(--gris);margin:0}
+  a.card .badge{display:inline-block;margin-top:10px;font-size:13px;color:var(--verde);font-weight:600}
+  a.card .badge.rep{color:var(--ambar)}
+  .hint{text-align:center;font-size:12px;color:var(--gris);margin-top:20px;line-height:1.6}
 </style>
 </head>
 <body>
 <header>
-  <div><h1>Banco de signos radiológicos</h1></div>
-  <div class="sub">el signo primero · el diagnóstico después</div>
+  <h1>Radiomática</h1>
+  <div class="sub">Repaso de bolsillo · offline · en tu dispositivo</div>
 </header>
-
 <div class="wrap">
-  <div class="barra">
-    <span><label>Región</label><select id="fReg" onchange="nuevaSesion()"><option value="">todas</option></select></span>
-    <span><label>Modo</label>
-      <select id="fModo" onchange="nuevaSesion()">
-        <option value="directo">nombre → qué es</option>
-        <option value="inverso">descripción → nombre</option>
-      </select></span>
-    <span><label>Tanda</label>
-      <select id="fTanda" onchange="nuevaSesion()">
-        <option value="hoy">repaso de hoy</option>
-        <option value="todos">todos</option>
-      </select></span>
-    <button class="btn sec peq" onclick="verLista()">Lista completa</button>
-    <button class="btn sec peq" onclick="exportarSignos()" title="Descarga tu progreso (útil en iPhone, donde Safari puede borrar datos de webs poco visitadas)">⬇ copia</button>
-    <button class="btn sec peq" onclick="document.getElementById('impSignos').click()">⬆ importar</button>
-    <button class="btn sec peq" onclick="toggleSync()" title="Copia un código de texto en un dispositivo y pégalo en el otro: la forma fácil de llevar el progreso entre móvil y ordenador">Sync 📲</button>
-    <input type="file" id="impSignos" accept=".json" class="oculto">
-    <span class="progreso">Signo <b id="pIdx">0</b>/<b id="pTot">0</b> · vencidos hoy <b id="pVenc">0</b> · nuevos <b id="pNuev">0</b> · dominados <b id="pDom">0</b></span>
-  </div>
-
-  <div id="panelSync" class="oculto" style="background:var(--papel);border:1px solid var(--linea);border-radius:8px;padding:14px 16px;margin-bottom:18px;font-size:13px">
-    <p style="color:var(--gris);margin-bottom:8px">Lleva tu progreso entre el móvil y el ordenador sin archivos:
-      <b>copia</b> este código aquí y <b>pégalo</b> en el mismo panel del otro dispositivo (por notas, WhatsApp a ti mismo…).
-      Al aplicar se fusiona: gana la versión más avanzada de cada signo.</p>
-    <textarea id="taSync" spellcheck="false" style="width:100%;min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid var(--linea);border-radius:6px;padding:8px;background:#fff;color:var(--tinta)"></textarea>
-    <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;align-items:center">
-      <button class="btn sec peq" onclick="copiarSync()">Copiar mi código</button>
-      <button class="btn sec peq" onclick="aplicarSync()">Aplicar código pegado</button>
-      <span id="syncEstado" style="color:var(--verde)"></span>
-    </div>
-  </div>
-
-  <div id="zonaLista" class="oculto"></div>
-  <div id="zonaCarta"></div>
-
-  <div class="nav" id="navBotones">
-    <button class="btn sec" id="btnPrev" onclick="ir(-1)">‹ Anterior</button>
-    <button class="btn sec" onclick="ir(1)">Siguiente ›</button>
-  </div>
-  <p class="atajos">Atajos · <b>Espacio</b> mostrar · <b>1</b> otra vez · <b>2</b> difícil · <b>3</b> bien · <b>4</b> fácil · <b>←/→</b> cambiar</p>
-
-  <p class="aviso">
-    <b>Repetición espaciada:</b> al calificar cada signo se programa su próximo repaso
-    (intervalos de 1 → 3 → 7 → 16 → 35 → 70 días). «Otra vez» lo devuelve al final de la
-    tanda actual; «Fácil» salta un nivel. La tanda «repaso de hoy» trae solo los vencidos
-    y los nuevos. El progreso se guarda en este navegador; usa «⬇ copia» de vez en cuando
-    (en iPhone, Safari puede borrar los datos de webs que no visitas en ~una semana).
-    Descripciones orientativas de estudio: contrasta siempre con tus textos de referencia
-    (Radiopaedia tiene entrada dedicada de casi todos, con imágenes de ejemplo).
-  </p>
+  <a class="card" href="signos.html">
+    <span class="emoji">📖</span>
+    <h2>Banco de signos</h2>
+    <p>~130 signos radiológicos clásicos con repetición espaciada tipo Anki y enlace a Radiopaedia.</p>
+    <div class="badge" id="bSignos"></div>
+  </a>
+  <a class="card" href="criterios.html">
+    <span class="emoji">🧮</span>
+    <h2>Criterios y calculadoras</h2>
+    <p>Washout suprarrenal, volumen/PSA, VD/VI, Fleischner, Bosniak, TI-RADS, PI-RADS, umbrales de guardia.</p>
+  </a>
+  <p class="hint">Añade esta página a la pantalla de inicio para abrirla como una app.<br>
+    Todo se guarda solo en este dispositivo. Sin datos de pacientes.</p>
 </div>
-
 <script>
-// nombre / región / modalidad / qué se ve / qué significa
-const SIGNOS=[
-// ── Tórax RX ──────────────────────────────────────────────────────────────
-['Signo de la silueta','Tórax','RX','Borramiento del contorno de una estructura (borde cardiaco, diafragma, aorta) por una opacidad adyacente de la misma densidad.','Localiza la lesión: está en contacto anatómico con la estructura borrada. Borra borde cardiaco derecho → lóbulo medio; borde izquierdo → língula; hemidiafragma → lóbulo inferior.'],
-['Broncograma aéreo','Tórax','RX/TC','Bronquios llenos de aire visibles como ramas radiolúcidas dentro de una opacidad pulmonar.','Ocupación alveolar con vía aérea permeable (neumonía, edema, hemorragia). Su presencia va en contra de obstrucción bronquial central completa.'],
-['Líneas B de Kerley','Tórax','RX','Líneas finas horizontales de ~1-2 cm en periferia de bases, que contactan con la pleura.','Engrosamiento de septos interlobulillares: edema intersticial (fallo cardiaco); si crónicas/irregulares, pensar en linfangitis carcinomatosa.'],
-['Signo de la S de Golden','Tórax','RX','Atelectasia de lóbulo superior derecho cuyo borde inferior dibuja una S invertida (convexidad central por masa).','Colapso lobar por masa central obstructiva: sospechar carcinoma broncogénico, sobre todo en fumador.'],
-['Luftsichel','Tórax','RX','Semiluna hiperclara paramediastínica superior izquierda (el segmento apical del LII hiperinsuflado rodea el arco aórtico).','Atelectasia del lóbulo superior izquierdo. En el adulto, obliga a descartar tumor central.'],
-['Joroba de Hampton','Tórax','RX/TC','Opacidad periférica triangular o en cúpula, de base pleural, habitualmente en bases.','Infarto pulmonar secundario a TEP.'],
-['Signo de Westermark','Tórax','RX','Oligohemia focal: zona de pulmón hiperclaro con vasos disminuidos de calibre.','TEP oclusivo proximal (signo poco sensible pero orientador).'],
-['Signo del surco profundo','Tórax','RX','En placa en decúbito supino, seno costofrénico anormalmente profundo y radiolúcido.','Neumotórax en paciente en supino (críticos, politrauma): el aire se acumula anterior e inferior, no apical.'],
-['Signo del menisco pleural','Tórax','RX','Opacidad basal homogénea de borde superior cóncavo que asciende hacia la pared lateral.','Derrame pleural.'],
-['Signo del dedo de guante','Tórax','RX/TC','Opacidades tubulares ramificadas en "V" o "Y" (bronquios rellenos de moco).','Impactación mucoide: ABPA, bronquiectasias, obstrucción bronquial (descartar lesión endobronquial).'],
-['Signo del diafragma continuo','Tórax','RX','El contorno diafragmático se ve continuo de lado a lado, por debajo de la silueta cardiaca.','Neumomediastino (aire interpuesto entre corazón y diafragma).'],
-// ── Tórax TC ──────────────────────────────────────────────────────────────
-['Signo del anillo de sello','Tórax','TC','Bronquio dilatado en corte axial junto a su arteria acompañante, más pequeña ("anillo" con "piedra").','Bronquiectasias (diámetro bronquial > arterial).'],
-['Árbol en brote (tree-in-bud)','Tórax','TC','Nodulillos centrolobulillares conectados a opacidades lineales ramificadas.','Bronquiolitis, típicamente infecciosa; diseminación endobronquial de TBC.'],
-['Empedrado (crazy paving)','Tórax','TC','Vidrio deslustrado con engrosamiento septal superpuesto (losetas de un empedrado).','Clásico de la proteinosis alveolar; también Pneumocystis, edema, hemorragia, COVID. Inespecífico: valorar contexto.'],
-['Signo del halo','Tórax','TC','Nódulo o masa rodeados de un halo de vidrio deslustrado.','En neutropénico febril, aspergilosis angioinvasiva (halo = hemorragia perilesional); también metástasis hemorrágicas.'],
-['Halo invertido (atolón)','Tórax','TC','Área de vidrio deslustrado central rodeada de un anillo de consolidación más denso.','Neumonía organizada (típico); también infarto pulmonar, TBC, mucormicosis.'],
-['Semiluna aérea (air crescent)','Tórax','TC','Media luna de aire que separa un fragmento sólido de la pared de una cavidad.','Aspergiloma que se moviliza dentro de una cavidad, o fase resolutiva de la aspergilosis angioinvasiva.'],
-['Cola de cometa (atelectasia redonda)','Tórax','TC','Vasos y bronquios que convergen en curva ("cola") hacia una masa subpleural, con pleura adyacente engrosada.','Atelectasia redonda (frecuente con enfermedad pleural por asbesto): pseudotumor, evitar biopsias innecesarias.'],
-// ── Abdomen RX ────────────────────────────────────────────────────────────
-['Signo de Rigler (doble pared)','Abdomen','RX','La pared intestinal se ve nítida porque hay aire a ambos lados (luminal y peritoneal).','Neumoperitoneo. Buscar también aire subdiafragmático en bipedestación.'],
-['Signo del grano de café','Abdomen','RX','Gran asa dilatada en U invertida que asciende desde la pelvis, con las paredes mediales apuestas formando el surco del "grano".','Vólvulo de sigma.'],
-['Signo del balón de fútbol','Abdomen','RX','Enorme radiolucencia ovalada que abomba el abdomen en supino, con el ligamento falciforme visible.','Neumoperitoneo masivo (típico descrito en niños).'],
-['Aerobilia','Abdomen','RX/TC','Aire en la vía biliar, de predominio CENTRAL (hiliar).','Normal tras CPRE/esfinterotomía o derivación. Sin ese antecedente: fístula bilioentérica → buscar íleo biliar (tríada de Rigler: aerobilia + obstrucción de delgado + cálculo ectópico).'],
-// ── Abdomen TC/ECO ────────────────────────────────────────────────────────
-['Signo del remolino (whirl)','Abdomen','TC','Vasos y grasa mesentérica arremolinados en espiral alrededor de un eje.','Torsión: vólvulo intestinal (incluido vólvulo de intestino medio por malrotación), torsión ovárica o de otro pedículo.'],
-['Signo de la diana / donut','Abdomen','ECO/TC','Anillos concéntricos: un asa (y su mesenterio) metida dentro de otra.','Invaginación intestinal. En el adulto, buscar la lesión que hace de cabeza de invaginación.'],
-['Pico de pájaro','Abdomen','TC/contraste','Afilamiento progresivo de la luz hacia un punto ("pico").','Punto de torsión de un vólvulo (sigma); en esofagograma, acalasia.'],
-['Media luna hiperdensa en AAA','Abdomen','TC','Semiluna espontáneamente hiperdensa dentro del trombo mural o la pared de un aneurisma aórtico.','Hematoma mural agudo: signo de inestabilidad, rotura inminente o en curso. Avisar YA.'],
-['Aorta drapeada','Abdomen','TC','La pared posterior de la aorta pierde su plano graso y "se amolda" al cuerpo vertebral.','Rotura contenida de aneurisma aórtico.'],
-['Mesenterio brumoso (misty mesentery)','Abdomen','TC','Aumento difuso de la densidad de la grasa mesentérica, mal definido.','Inespecífico: paniculitis mesentérica, edema, hemorragia, linfoma. Correlacionar (adenopatías, contexto).'],
-['Neumatosis + gas portal','Abdomen','TC','Gas en la pared intestinal y ramificaciones aéreas PERIFÉRICAS en el hígado (el gas portal llega a periferia; la aerobilia queda central).','Isquemia mesentérica evolucionada con necrosis: gravedad alta. Distinguir gas portal (periférico) de aerobilia (central).'],
-['Signo del cinturón de seguridad','Abdomen','TC','Contusión en banda de la pared abdominal tras accidente, con líquido/mesenterio "sucio" adyacente.','Alta asociación con lesión de víscera hueca y mesenterio: buscarlas activamente, no conformarse con "sin lesión de órgano sólido".'],
-['Murphy ecográfico','Abdomen','ECO','Dolor máximo y selectivo al comprimir la vesícula con la sonda.','Apoya colecistitis aguda (junto a litiasis, pared >3 mm y líquido perivesicular).'],
-['Signo WES (wall-echo-shadow)','Abdomen','ECO','Dos líneas ecogénicas (pared + superficie de los cálculos) con gran sombra posterior: vesícula contraída llena de litiasis.','Colelitiasis con vesícula escleroatrófica. No confundir con asa con gas.'],
-['Pseudorriñón','Abdomen','ECO','Estructura que remeda un riñón: centro ecogénico (luz) con corteza gruesa hipoecoica (pared engrosada).','Engrosamiento mural intestinal significativo (neoplasia, invaginación, inflamación): completar con TC.'],
-['Cola de cometa vesicular','Abdomen','ECO','Artefacto de reverberación corto y triangular que cuelga de un foco ecogénico de la pared vesicular.','Adenomiomatosis (cristales de colesterol en senos de Rokitansky-Aschoff). Benigno; no confundir con litiasis.'],
-['Ojo de buey hepático','Abdomen','ECO','Lesión focal con centro ecogénico y halo hipoecoico periférico.','Sugerente de metástasis hepática (halo = tumor viable/compresión). Buscar primario y más lesiones.'],
-['Tormenta de nieve','Abdomen','ECO','Ecos brillantes difusos con sombra "sucia" que borra los planos profundos.','En mama: rotura extracapsular de prótesis (siliconoma). En obstetricia: mola hidatiforme (descripción clásica).'],
-// ── Neuro ─────────────────────────────────────────────────────────────────
-['ACM hiperdensa','Neuro','TC','La arteria cerebral media se ve espontáneamente más densa que las demás arterias en el TC sin contraste.','Trombo agudo en ACM: ictus isquémico hiperagudo. Correlacionar con clínica y activar código ictus.'],
-['Pérdida del ribete insular','Neuro','TC','Borramiento de la diferenciación córtico-subcortical de la ínsula.','Signo precoz de isquemia en territorio de ACM (se valora en el ASPECTS).'],
-['Signo del delta vacío','Neuro','TC con CIV','Defecto de repleción triangular en el seno sagital superior con realce de la duramadre alrededor.','Trombosis de senos venosos cerebrales. En el TC simple buscar el seno espontáneamente denso.'],
-['Signo de la cola dural','Neuro','RM con CIV','Realce dural adyacente a una masa extraaxial que se va afilando al alejarse.','Típico (no patognomónico) de meningioma.'],
-['Ojos de mapache','Neuro','Clínico/TC','Equimosis periorbitaria bilateral tras traumatismo.','Sugiere fractura de base de cráneo anterior: buscarla en el TC (y neumoencéfalo, ocupación de senos).'],
-// ── Musculoesquelético ────────────────────────────────────────────────────
-['Signo de la vela (almohadilla grasa)','MSK','RX','Elevación de la almohadilla grasa anterior del codo ("vela") y/o visualización de la posterior (siempre patológica).','Derrame articular del codo: en el niño, buscar fractura supracondílea; en el adulto, fractura de cúpula radial (aunque no se vea el trazo).'],
-['Fractura de Segond','MSK','RX','Pequeña avulsión cortical vertical en el margen lateral de la meseta tibial.','Marcador de rotura del ligamento cruzado anterior (asociación casi constante): pedir/valorar RM.'],
-['Vértebra de marfil','MSK','RX/TC','Cuerpo vertebral difusamente denso (blanco) con morfología conservada.','Metástasis blástica (próstata, mama), linfoma o Paget. Correlacionar con edad y contexto.'],
-['Signo de la doble línea','MSK','RM','En T2, línea externa hipointensa (esclerosis) con línea interna hiperintensa (tejido de granulación) delimitando una zona serpiginosa.','Osteonecrosis / infarto óseo (muy característico).'],
-['Signo de la semiluna subcondral','MSK','RX/TC','Línea radiolúcida curvilínea inmediatamente bajo el hueso subcondral de la cabeza femoral.','Necrosis avascular con fractura subcondral: riesgo de colapso inminente de la superficie articular.'],
-// ── Urología / vascular ───────────────────────────────────────────────────
-['Signo del anillo ureteral (rim sign)','Abdomen','TC','Halo de partes blandas (pared ureteral edematosa) rodeando una calcificación pélvica.','Apoya que la calcificación es un cálculo ureteral y no un flebolito (el flebolito suele tener "cola de cometa" venosa y centro claro).'],
-['Signo del yin-yang','Vascular','ECO Doppler/TC','Flujo bidireccional arremolinado (mitad roja, mitad azul) dentro de un saco conectado a una arteria.','Pseudoaneurisma (buscar el cuello). En TC, saco con realce arterial junto al vaso.'],
-];
-
-// ── Estado: repetición espaciada tipo Anki ───────────────────────────────────
-// Por signo: {n: nivel 0-5, p: timestamp del próximo repaso, v: veces visto}.
-// Calificas cada carta (Otra vez / Difícil / Bien / Fácil) y el intervalo
-// crece con la ESCALA; «Otra vez» además reencola la carta en la tanda actual.
-const LS_KEY='signos_srs_v1';
-const LS_VIEJO='signos_repasar_v1';   // formato antiguo ('se'|'rep'): se migra
-const DIA=86400000;
-const ESCALA=[1,3,7,16,35,70];   // días entre repasos según nivel
-let SRS={};
-try{ const r=localStorage.getItem(LS_KEY); if(r) SRS=JSON.parse(r)||{}; }catch(e){}
-if(!Object.keys(SRS).length){
-  try{
-    const v=JSON.parse(localStorage.getItem(LS_VIEJO)||'{}');
-    for(const [k,m] of Object.entries(v))
-      SRS[k]= m==='se' ? {n:1,p:Date.now()+3*DIA,v:1} : {n:0,p:Date.now(),v:1};
-    if(Object.keys(SRS).length){ persistir(); localStorage.removeItem(LS_VIEJO); }
-  }catch(e){}
-}
-function persistir(){ try{ localStorage.setItem(LS_KEY,JSON.stringify(SRS)); }catch(e){} }
-function esNuevo(s){ return !SRS[s[0]]; }
-function vencido(s){ const e=SRS[s[0]]; return !!(e && e.p<=Date.now()); }
-function dominado(s){ const e=SRS[s[0]]; return !!(e && e.n>=4); }
-function nivelTras(g,nPrev){
-  if(g==='otra')    return 0;
-  if(g==='dificil') return Math.max(0,nPrev-1);
-  if(g==='bien')    return Math.min(ESCALA.length-1,nPrev+1);
-  return Math.min(ESCALA.length-1,nPrev+2);   // fácil: salta un nivel
-}
-function etiquetaDias(g,s){
-  const e=SRS[s[0]];
-  return ESCALA[nivelTras(g, e?e.n:0)]+' d';
-}
-
-let mazo=[], i=0, mostrado=false, enLista=false;
-function esc(s){ return (s==null?'':s.toString()).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function barajar(a){ for(let k=a.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
-
-function nuevaSesion(){
-  const reg=document.getElementById('fReg').value;
-  const tanda=document.getElementById('fTanda').value;
-  const base=SIGNOS.filter(s=>!reg||s[1]===reg);
-  if(tanda==='hoy') mazo=barajar(base.filter(vencido)).concat(barajar(base.filter(esNuevo)));
-  else mazo=barajar(base.slice());
-  i=0; mostrado=false; enLista=false;
-  document.getElementById('zonaLista').classList.add('oculto');
-  document.getElementById('zonaCarta').classList.remove('oculto');
-  document.getElementById('navBotones').classList.remove('oculto');
-  render();
-}
-function render(){
-  const zona=document.getElementById('zonaCarta');
-  actualizarProgreso();
-  if(!mazo.length){
-    const esHoy=document.getElementById('fTanda').value==='hoy';
-    zona.innerHTML='<div class="tapado">'+(esHoy
-      ?'Sin repasos vencidos ni signos nuevos hoy con estos filtros. ¡Al día! Vuelve mañana o cambia la tanda a «todos».'
-      :'No hay signos con estos filtros.')+'</div>';
-    return;
-  }
-  if(i>=mazo.length){
-    const esHoy=document.getElementById('fTanda').value==='hoy';
-    zona.innerHTML=`<div class="carta" style="text-align:center"><div class="pregunta">Tanda completada</div>
-      <p style="color:var(--gris)">${esHoy?'Repasos de hoy al día. Los intervalos siguen creciendo: vuelve mañana.':'Has pasado los '+mazo.length+' signos de esta tanda.'}</p>
-      <div class="acciones" style="justify-content:center">
-        <button class="btn" onclick="nuevaSesion()">Otra tanda</button>
-      </div></div>`;
-    return;
-  }
-  const s=mazo[i];
-  const modo=document.getElementById('fModo').value;
-  const e=SRS[s[0]];
-  const pregunta = modo==='directo' ? s[0] : s[3];
-  let h=`<div class="carta">
-    <div class="etq">${modo==='directo'?'¿Qué es y qué significa?':'¿Qué signo es?'}
-      <span class="chip">${esc(s[1])}</span><span class="chip">${esc(s[2])}</span>
-      ${!e?'<span class="chip">nuevo</span>':'<span class="chip'+(vencido(s)?' rep':'')+'">nivel '+e.n+(vencido(s)?' · vencido':'')+'</span>'}</div>
-    <div class="pregunta">${esc(pregunta)}</div>`;
-  if(!mostrado){
-    h+=`<div class="tapado">Piensa tu respuesta y pulsa mostrar.</div>
-      <div class="acciones"><button class="btn rev" onclick="mostrar()">Mostrar respuesta</button></div>`;
-  }else{
-    h+=`<div class="respuesta">
-      ${modo==='inverso'?`<div class="b">Signo</div><p><b>${esc(s[0])}</b></p>`:''}
-      ${modo==='directo'?`<div class="b">Qué se ve</div><p>${esc(s[3])}</p>`:''}
-      <div class="b">Qué significa</div><p>${esc(s[4])}</p></div>
-    <div class="acciones">
-      <button class="btn sec" style="border-color:var(--rojo);color:var(--rojo)" onclick="calificar('otra')" title="No lo sabía: vuelve al final de esta tanda y mañana">Otra vez (1) · ahora</button>
-      <button class="btn sec" style="border-color:var(--ambar);color:var(--ambar)" onclick="calificar('dificil')">Difícil (2) · ${etiquetaDias('dificil',s)}</button>
-      <button class="btn sec" onclick="calificar('bien')">Bien (3) · ${etiquetaDias('bien',s)}</button>
-      <button class="btn sec" style="border-color:var(--verde);color:var(--verde)" onclick="calificar('facil')">Fácil (4) · ${etiquetaDias('facil',s)}</button>
-    </div>`;
-  }
-  h+='</div>';
-  zona.innerHTML=h;
-  document.getElementById('btnPrev').disabled=(i===0);
-}
-function mostrar(){ mostrado=true; render(); }
-function calificar(g){
-  const s=mazo[i];
-  const e=SRS[s[0]];
-  const n=nivelTras(g, e?e.n:0);
-  SRS[s[0]]={n:n, p:Date.now()+ESCALA[n]*DIA, v:((e&&e.v)||0)+1};
-  persistir();
-  if(g==='otra') mazo.push(s);   // «Otra vez»: reaparece al final de ESTA tanda
-  ir(1);
-}
-function ir(d){
-  i=Math.max(0,i+d); mostrado=false; render();
-}
-function actualizarProgreso(){
-  const reg=document.getElementById('fReg').value;
-  const base=SIGNOS.filter(s=>!reg||s[1]===reg);
-  document.getElementById('pIdx').textContent=Math.min(i+1,mazo.length);
-  document.getElementById('pTot').textContent=mazo.length;
-  document.getElementById('pVenc').textContent=base.filter(vencido).length;
-  document.getElementById('pNuev').textContent=base.filter(esNuevo).length;
-  document.getElementById('pDom').textContent=base.filter(dominado).length+'/'+base.length;
-}
-// Copia de seguridad del progreso (en iPhone, Safari puede borrar los datos de
-// webs que no visitas en ~7 días: exporta de vez en cuando)
-function exportarSignos(){
-  const blob=new Blob([JSON.stringify(SRS)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='progreso_signos_'+new Date().toISOString().slice(0,10)+'.json';
-  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),0);
-}
-// --- Sync por código de texto: la forma cómoda de mover el progreso entre
-// móvil y ordenador (sin archivos). El código es el progreso completo en
-// base64 con prefijo de versión; al aplicar se FUSIONA: para cada signo gana
-// la entrada más repasada (más 'v'; a igualdad, la de repaso más lejano).
-const SYNC_PREFIJO='SRX1.';
-function codigoSync(){
-  return SYNC_PREFIJO+btoa(unescape(encodeURIComponent(JSON.stringify(SRS))));
-}
-function toggleSync(){
-  const p=document.getElementById('panelSync');
-  if(p.classList.toggle('oculto')) return;
-  document.getElementById('taSync').value=codigoSync();
-  document.getElementById('syncEstado').textContent='';
-}
-async function copiarSync(){
-  const ta=document.getElementById('taSync');
-  ta.value=codigoSync();   // regenerar por si calificaste después de abrir el panel
-  try{ await navigator.clipboard.writeText(ta.value); }
-  catch(e){ ta.select(); try{ document.execCommand('copy'); }catch(_){} }
-  document.getElementById('syncEstado').textContent='Copiado ✓ — pégalo en el otro dispositivo';
-}
-function aplicarSync(){
-  const est=document.getElementById('syncEstado');
-  const txt=(document.getElementById('taSync').value||'').trim();
-  try{
-    if(!txt.startsWith(SYNC_PREFIJO)) throw new Error('prefijo');
-    const d=JSON.parse(decodeURIComponent(escape(atob(txt.slice(SYNC_PREFIJO.length)))));
-    if(typeof d!=='object'||d===null||Array.isArray(d)) throw new Error('formato');
-    let cambiados=0;
-    for(const [k,e] of Object.entries(d)){
-      if(!e||typeof e.n!=='number') continue;
-      const mio=SRS[k];
-      // gana la entrada más avanzada: más repasos; a igualdad, próximo repaso más lejano
-      if(!mio || (e.v||0)>(mio.v||0) || ((e.v||0)===(mio.v||0) && (e.p||0)>(mio.p||0))){
-        SRS[k]=e; cambiados++;
-      }
-    }
-    persistir();
-    est.style.color='var(--verde)';
-    est.textContent='Aplicado ✓ — '+cambiados+' signo(s) actualizados';
-    nuevaSesion();
-    document.getElementById('panelSync').classList.remove('oculto');
-    document.getElementById('taSync').value=codigoSync();
-  }catch(err){
-    est.style.color='var(--rojo)';
-    est.textContent='Ese texto no es un código de sync válido (empieza por SRX1.)';
-  }
-}
-document.getElementById('impSignos').addEventListener('change',e=>{
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    try{
-      const d=JSON.parse(ev.target.result);
-      if(typeof d!=='object'||d===null||Array.isArray(d)) throw new Error('formato');
-      Object.assign(SRS,d); persistir(); nuevaSesion();
-    }catch(_){ alert('No es un progreso de signos válido.'); }
-    e.target.value='';
-  };
-  r.readAsText(f);
-});
-function verLista(){
-  enLista=!enLista;
-  const zl=document.getElementById('zonaLista');
-  if(!enLista){ zl.classList.add('oculto');
-    document.getElementById('zonaCarta').classList.remove('oculto');
-    document.getElementById('navBotones').classList.remove('oculto');
-    render(); return; }
-  const reg=document.getElementById('fReg').value;
-  const filas=SIGNOS.filter(s=>!reg||s[1]===reg)
-    .slice().sort((a,b)=>a[1].localeCompare(b[1])||a[0].localeCompare(b[0]));
-  let h='<table class="lista"><tr><th>Signo</th><th>Región</th><th>Qué se ve</th><th>Qué significa</th></tr>';
-  for(const s of filas){
-    const e=SRS[s[0]];
-    const est=!e?'':(vencido(s)?' <span class="rep">n'+e.n+' vencido</span>':' <span style="color:var(--gris)">n'+e.n+'</span>');
-    h+=`<tr><td>${esc(s[0])}${est}</td>
-      <td>${esc(s[1])} · ${esc(s[2])}</td><td>${esc(s[3])}</td><td>${esc(s[4])}</td></tr>`;
-  }
-  h+='</table>';
-  zl.innerHTML=h; zl.classList.remove('oculto');
-  document.getElementById('zonaCarta').classList.add('oculto');
-  document.getElementById('navBotones').classList.add('oculto');
-}
-
-// Filtro de regiones
 (function(){
-  const sel=document.getElementById('fReg');
-  for(const r of [...new Set(SIGNOS.map(s=>s[1]))]){
-    const o=document.createElement('option'); o.value=r; o.textContent=r; sel.appendChild(o);
-  }
+  try{
+    const srs=JSON.parse(localStorage.getItem('signos_srs_v1')||'{}');
+    const ahora=Date.now();
+    const venc=Object.values(srs).filter(e=>e&&e.p&&e.p<=ahora).length;
+    const vistos=Object.keys(srs).length;
+    const el=document.getElementById('bSignos');
+    if(!vistos) el.textContent='sin empezar — 5 min y arrancas';
+    else if(venc){ el.textContent=venc+' signo(s) para repasar hoy'; el.classList.add('rep'); }
+    else el.textContent='signos al día ✓';
+  }catch(e){}
 })();
-document.addEventListener('keydown',ev=>{
-  if(/^(input|select|textarea)$/i.test(ev.target.tagName)) return;
-  if(enLista) return;
-  if(ev.key===' '){ ev.preventDefault(); if(!mostrado && i<mazo.length) mostrar(); }
-  else if(ev.key==='ArrowRight') ir(1);
-  else if(ev.key==='ArrowLeft') ir(-1);
-  else if(mostrado && ev.key==='1') calificar('otra');
-  else if(mostrado && ev.key==='2') calificar('dificil');
-  else if(mostrado && ev.key==='3') calificar('bien');
-  else if(mostrado && ev.key==='4') calificar('facil');
-});
-nuevaSesion();
 </script>
 </body>
 </html>

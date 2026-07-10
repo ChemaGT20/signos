@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Criterios Rx">
+<title>Criterios y calculadoras radiológicas</title>
+<style>
+  :root{
+    --tinta:#1a2238; --hueso:#f3f1ea; --papel:#fbfaf6; --ambar:#c4602a;
+    --verde:#2f6b4f; --rojo:#a33a3a; --gris:#7a7a72; --linea:#d9d5c8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    background:var(--hueso);color:var(--tinta);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  header{border-bottom:1.5px solid var(--tinta);padding:18px 24px;
+    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  header h1{font-size:21px;font-weight:600}
+  header .sub{font-size:12px;color:var(--gris);letter-spacing:.04em;text-transform:uppercase}
+  header a{color:var(--ambar)}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px;display:grid;grid-template-columns:230px 1fr;gap:22px}
+  @media(max-width:760px){.wrap{grid-template-columns:1fr}}
+  .lista{align-self:start}
+  .grupo{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);margin:14px 0 5px}
+  .grupo:first-child{margin-top:0}
+  .item{display:block;width:100%;text-align:left;font-family:inherit;font-size:14px;
+    padding:7px 10px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--tinta);cursor:pointer;}
+  .item:hover{background:var(--papel);border-color:var(--linea)}
+  .item.on{background:var(--tinta);color:var(--hueso)}
+  .cont{background:var(--papel);border:1px solid var(--linea);border-radius:10px;padding:22px}
+  .cont h2{font-size:18px;margin-bottom:4px}
+  .cont .fuente{font-size:12px;color:var(--gris);font-style:italic;margin-bottom:16px}
+  .cont h3{font-size:14px;margin:18px 0 6px;color:var(--tinta)}
+  .cont p{font-size:14px;margin-bottom:8px}
+  .cont ul{margin:0 0 10px 20px;font-size:14px}
+  .cont li{margin-bottom:3px}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 14px}
+  th{font-size:11px;color:var(--gris);text-align:left;padding:5px 8px;border-bottom:1.5px solid var(--tinta)}
+  td{padding:5px 8px;border-bottom:1px solid var(--linea);vertical-align:top}
+  td:first-child{font-weight:600;white-space:nowrap}
+  .calc{background:#fff;border:1px solid var(--linea);border-radius:8px;padding:16px;margin:10px 0}
+  .calc label{display:block;font-size:13px;color:var(--gris);margin:8px 0 2px}
+  .calc input,.calc select{font-family:inherit;font-size:15px;border:1px solid var(--linea);border-radius:6px;
+    padding:7px 9px;background:var(--hueso);color:var(--tinta);width:130px}
+  .calc .fila{display:flex;gap:16px;flex-wrap:wrap}
+  .resu{margin-top:14px;padding:12px 14px;border-radius:8px;background:var(--hueso);border-left:3px solid var(--ambar);font-size:15px;min-height:20px}
+  .resu b{font-size:17px}
+  .verde{color:var(--verde)} .rojo{color:var(--rojo)} .ambar{color:var(--ambar)}
+  .aviso{grid-column:1/-1;font-size:12px;color:var(--gris);border-top:1px solid var(--linea);padding-top:14px;line-height:1.6}
+  .vacio{color:var(--gris);font-style:italic;padding:30px;text-align:center}
+  .nota{font-size:12px;color:var(--gris);font-style:italic}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Criterios y calculadoras</h1></div>
+  <div class="sub"><a href="index.html">‹ inicio</a> · referencia rápida de guardia</div>
+</header>
+
+<div class="wrap">
+  <nav class="lista" id="lista"></nav>
+  <div class="cont" id="cont"><div class="vacio">Elige una herramienta de la izquierda.</div></div>
+
+  <p class="aviso">
+    <b>Referencia orientativa de uso personal.</b> Resúmenes de memoria para agilizar la guardia; pueden contener
+    errores o simplificaciones y las guías se actualizan. Verifica siempre con la fuente original y con el criterio
+    de tu servicio antes de decidir. No sustituye el juicio clínico. Sin datos de pacientes: es una calculadora, no un registro.
+  </p>
+</div>
+
+<script>
+// Cada herramienta: {id, grupo, nombre, html(function opcional) o texto}
+const TOOLS=[
+{id:'washout',grupo:'Calculadoras',nombre:'Washout suprarrenal',render:()=>`
+  <h2>Washout de contraste — nódulo suprarrenal</h2>
+  <div class="fuente">Diferencia adenoma (aclara rápido) de otras lesiones. Requiere basal + portal (60–75 s) + tardío (15 min).</div>
+  <div class="calc">
+    <div class="fila">
+      <div><label>Basal / sin contraste (UH)</label><input type="number" id="w_basal" oninput="calcWashout()"></div>
+      <div><label>Portal ~60–75 s (UH)</label><input type="number" id="w_portal" oninput="calcWashout()"></div>
+      <div><label>Tardío 15 min (UH)</label><input type="number" id="w_tard" oninput="calcWashout()"></div>
+    </div>
+    <div class="resu" id="w_out">Introduce los tres valores.</div>
+  </div>
+  <h3>Interpretación</h3>
+  <ul>
+    <li><b>Basal ≤ 10 UH</b> → adenoma rico en lípidos (no necesita washout).</li>
+    <li><b>Washout absoluto ≥ 60 %</b> o <b>relativo ≥ 40 %</b> → adenoma (pobre en lípidos).</li>
+    <li>Washout bajo → indeterminado: feocromocitoma, metástasis, carcinoma… correlacionar.</li>
+  </ul>
+  <p class="nota">Absoluto = (portal − tardío)/(portal − basal) × 100. Relativo = (portal − tardío)/portal × 100.</p>`},
+
+{id:'volumen',grupo:'Calculadoras',nombre:'Volumen elipsoide / densidad PSA',render:()=>`
+  <h2>Volumen elipsoide</h2>
+  <div class="fuente">Próstata, tiroides, cualquier estructura ovalada. Volumen = L × AP × T × 0,52.</div>
+  <div class="calc">
+    <div class="fila">
+      <div><label>Longitudinal (mm)</label><input type="number" id="v_l" oninput="calcVol()"></div>
+      <div><label>Anteroposterior (mm)</label><input type="number" id="v_ap" oninput="calcVol()"></div>
+      <div><label>Transverso (mm)</label><input type="number" id="v_t" oninput="calcVol()"></div>
+      <div><label>PSA (ng/mL, opcional)</label><input type="number" id="v_psa" oninput="calcVol()"></div>
+    </div>
+    <div class="resu" id="v_out">Introduce los tres diámetros.</div>
+  </div>
+  <ul>
+    <li>Densidad de PSA = PSA / volumen prostático. <b>≥ 0,15</b> aumenta la sospecha de cáncer clínicamente significativo.</li>
+    <li>Tiroides: lóbulo normal ~7–10 mL; glándula total ~10–20 mL.</li>
+  </ul>`},
+
+{id:'vdvi',grupo:'Calculadoras',nombre:'Ratio VD/VI (TEP)',render:()=>`
+  <h2>Relación VD/VI — sobrecarga derecha en TEP</h2>
+  <div class="fuente">Diámetros máximos de ventrículo D e I en el plano axial (o 4 cámaras reconstruido).</div>
+  <div class="calc">
+    <div class="fila">
+      <div><label>Diámetro VD (mm)</label><input type="number" id="r_vd" oninput="calcVDVI()"></div>
+      <div><label>Diámetro VI (mm)</label><input type="number" id="r_vi" oninput="calcVDVI()"></div>
+    </div>
+    <div class="resu" id="r_out">Introduce ambos diámetros.</div>
+  </div>
+  <ul>
+    <li><b>VD/VI ≥ 1,0</b> → dilatación del VD: marcador de disfunción y peor pronóstico en TEP agudo.</li>
+    <li>Otros signos: rectificación/abombamiento del septo hacia VI, reflujo de contraste a cava/suprahepáticas.</li>
+  </ul>`},
+
+{id:'fleischner',grupo:'Clasificaciones',nombre:'Fleischner 2017 (nódulo pulmonar)',render:()=>`
+  <h2>Guía Fleischner 2017 — nódulo pulmonar incidental</h2>
+  <div class="fuente">Adultos ≥ 35 años, incidental, NO cribado ni oncológico conocido ni inmunodeprimido.</div>
+  <h3>Nódulo sólido</h3>
+  <table><tr><th>Tamaño</th><th>Bajo riesgo</th><th>Alto riesgo</th></tr>
+    <tr><td>&lt; 6 mm</td><td>No control</td><td>Opcional 12 m</td></tr>
+    <tr><td>6–8 mm</td><td>TC 6–12 m</td><td>TC 6–12 m, luego 18–24 m</td></tr>
+    <tr><td>&gt; 8 mm</td><td colspan="2">TC 3 m, PET-TC o biopsia según sospecha</td></tr>
+    <tr><td>Múltiples</td><td>según el mayor</td><td>según el mayor</td></tr></table>
+  <h3>Nódulo subsólido</h3>
+  <table><tr><th>Tipo</th><th>Conducta</th></tr>
+    <tr><td>Vidrio deslustrado &lt; 6 mm</td><td>No control rutinario</td></tr>
+    <tr><td>Vidrio deslustrado ≥ 6 mm</td><td>TC 6–12 m, luego cada 2 años hasta 5 años</td></tr>
+    <tr><td>Parcialmente sólido ≥ 6 mm</td><td>TC 3–6 m; si persiste y componente sólido ≥ 6 mm → sospecha alta</td></tr></table>
+  <p class="nota">Riesgo alto = tabaquismo, edad avanzada, bordes espiculados, lóbulos superiores, enfisema/fibrosis. Mide como media de eje largo y corto.</p>`},
+
+{id:'bosniak',grupo:'Clasificaciones',nombre:'Bosniak 2019 (quiste renal)',render:()=>`
+  <h2>Bosniak 2019 — quiste renal (TC/RM)</h2>
+  <div class="fuente">Estratifica el riesgo de malignidad de una lesión quística renal.</div>
+  <table><tr><th>Clase</th><th>Hallazgos</th><th>Malignidad ~</th><th>Conducta</th></tr>
+    <tr><td>I</td><td>Pared fina (≤2 mm), sin tabiques ni realce, densidad agua</td><td>~0 %</td><td>Ninguna</td></tr>
+    <tr><td>II</td><td>Pocos tabiques finos, calcio fino, hiperdenso &lt;3 cm homogéneo</td><td>&lt;1 %</td><td>Ninguna</td></tr>
+    <tr><td>IIF</td><td>Tabiques finos numerosos, pared/tabique mínimamente engrosados (3 mm)</td><td>~5 %</td><td>Seguimiento (6 m, luego anual 5 a)</td></tr>
+    <tr><td>III</td><td>Pared/tabiques engrosados (≥4 mm) o irregulares con realce</td><td>~50 %</td><td>Cirugía/valorar</td></tr>
+    <tr><td>IV</td><td>Componente sólido con realce (nódulo &gt;4 mm)</td><td>~90 %</td><td>Cirugía</td></tr></table>
+  <p class="nota">"Realce" = captación inequívoca. En RM, la clase puede subir por tabiques/realce mejor vistos.</p>`},
+
+{id:'tirads',grupo:'Clasificaciones',nombre:'ACR TI-RADS (tiroides)',render:()=>`
+  <h2>ACR TI-RADS — nódulo tiroideo</h2>
+  <div class="fuente">Suma de puntos por categoría; el resultado marca el umbral de PAAF según tamaño.</div>
+  <table><tr><th>Categoría</th><th>Puntos</th></tr>
+    <tr><td>Composición</td><td>quístico/espongiforme 0 · mixto 1 · sólido 2</td></tr>
+    <tr><td>Ecogenicidad</td><td>an/hiper/isoecoico 1 · hipoecoico 2 · muy hipoecoico 3</td></tr>
+    <tr><td>Forma</td><td>más ancho que alto 0 · más alto que ancho 3</td></tr>
+    <tr><td>Margen</td><td>liso/mal definido 0 · lobulado/irregular 2 · extensión extratiroidea 3</td></tr>
+    <tr><td>Focos ecogénicos</td><td>ninguno/cola cometa 0 · macrocalcio 1 · periférico 2 · puntiformes 3</td></tr></table>
+  <table><tr><th>Puntos → TR</th><th>PAAF si…</th></tr>
+    <tr><td>0 (TR1) / 2 (TR2)</td><td>no PAAF</td></tr>
+    <tr><td>3 (TR3)</td><td>≥ 2,5 cm (seguir ≥ 1,5)</td></tr>
+    <tr><td>4–6 (TR4)</td><td>≥ 1,5 cm (seguir ≥ 1,0)</td></tr>
+    <tr><td>≥ 7 (TR5)</td><td>≥ 1,0 cm (seguir ≥ 0,5)</td></tr></table>`},
+
+{id:'pirads',grupo:'Clasificaciones',nombre:'PI-RADS v2.1 (próstata) — resumen',render:()=>`
+  <h2>PI-RADS v2.1 — resumen operativo</h2>
+  <div class="fuente">Secuencia dominante según zona. RM multiparamétrica.</div>
+  <ul>
+    <li><b>Zona periférica:</b> manda la <b>difusión (DWI/ADC)</b>. DCE (contraste) solo desempata el 3→4.</li>
+    <li><b>Zona transicional:</b> manda la <b>T2</b> ("carbón borroso" / lenticular sin cápsula = sospechoso).</li>
+    <li><b>PI-RADS 1–2</b> benigno · <b>3</b> equívoco · <b>4</b> probable · <b>5</b> muy probable (≥1,5 cm o extensión).</li>
+    <li>DCE positivo = realce focal precoz coincidente con hallazgo en T2/DWI.</li>
+  </ul>`},
+
+{id:'apendicitis',grupo:'Criterios',nombre:'Apendicitis (ECO/TC)',render:()=>`
+  <h2>Apendicitis aguda — criterios de imagen</h2>
+  <h3>Ecografía</h3>
+  <ul>
+    <li>Diámetro <b>&gt; 6 mm</b>, no compresible, aperistáltico.</li>
+    <li>Pared engrosada en capas, hiperemia en Doppler, grasa ecogénica alrededor.</li>
+    <li>Apendicolito con sombra. Dolor selectivo bajo la sonda.</li>
+  </ul>
+  <h3>TC</h3>
+  <ul>
+    <li>Apéndice &gt; 6 mm, engrosamiento y realce mural, rarefacción de la grasa periapendicular.</li>
+    <li>Apendicolito. Signos de complicación: absceso, flemón, gas extraluminal, líquido libre.</li>
+  </ul>
+  <p class="nota">Ojo a apéndice retrocecal o pélvico (eco falsamente negativa); si eco no concluyente y clínica típica → TC.</p>`},
+
+{id:'colecistitis',grupo:'Criterios',nombre:'Colecistitis (ECO)',render:()=>`
+  <h2>Colecistitis aguda — criterios ecográficos</h2>
+  <ul>
+    <li>Litiasis (o barro) — a menudo <b>impactada en el cuello</b>.</li>
+    <li><b>Murphy ecográfico</b> positivo (dolor máximo bajo la sonda sobre la vesícula).</li>
+    <li>Pared <b>&gt; 3 mm</b> (edematosa/estratificada).</li>
+    <li>Líquido perivesicular, distensión (&gt; 4 cm eje corto).</li>
+    <li>Signos de gravedad: gas en pared (enfisematosa), membranas (gangrenosa), colección.</li>
+  </ul>
+  <p class="nota">Alitiásica en el crítico: pared engrosada + barro + distensión sin cálculo. TC/HIDA si duda.</p>`},
+
+{id:'aorta',grupo:'Criterios',nombre:'Aorta / umbrales varios',render:()=>`
+  <h2>Umbrales rápidos</h2>
+  <table><tr><th>Estructura</th><th>Normal / umbral</th></tr>
+    <tr><td>Aorta abdominal</td><td>aneurisma si &gt; 3 cm; cirugía electiva ≥ 5,5 cm (♂) / ≥ 5,0 (♀) o crecimiento &gt;1 cm/año</td></tr>
+    <tr><td>Aorta ascendente</td><td>aneurisma &gt; 4 cm; valorar cirugía ~5,5 cm (antes si válvula bicúspide/Marfan)</td></tr>
+    <tr><td>Tronco pulmonar</td><td>dilatado &gt; 29 mm (sugiere HTP)</td></tr>
+    <tr><td>Colédoco</td><td>&lt; 7 mm (&lt; 10 si colecistectomía; +1 mm/década orientativo)</td></tr>
+    <tr><td>Delgado / colon / ciego</td><td>dilatado &gt; 3 / &gt; 6 / &gt; 9 cm</td></tr>
+    <tr><td>Adenopatía</td><td>eje corto &gt; 10 mm (varía por estación; retrocrural &gt;6)</td></tr>
+    <tr><td>Bazo</td><td>esplenomegalia &gt; 12–13 cm</td></tr>
+    <tr><td>Apéndice / uréter litiasis</td><td>apéndice &gt; 6 mm patológico</td></tr>
+  </table>`},
+];
+
+let actual=null;
+function renderLista(){
+  const grupos={};
+  for(const t of TOOLS){ (grupos[t.grupo]=grupos[t.grupo]||[]).push(t); }
+  const orden=['Calculadoras','Clasificaciones','Criterios'];
+  let h='';
+  for(const g of orden){
+    if(!grupos[g]) continue;
+    h+=`<div class="grupo">${g}</div>`;
+    for(const t of grupos[g]) h+=`<button class="item ${actual===t.id?'on':''}" onclick="abrir('${t.id}')">${t.nombre}</button>`;
+  }
+  document.getElementById('lista').innerHTML=h;
+}
+function abrir(id){
+  actual=id;
+  const t=TOOLS.find(x=>x.id===id);
+  document.getElementById('cont').innerHTML=t.render();
+  renderLista();
+}
+// --- Calculadoras ---
+function num(id){ const v=parseFloat(document.getElementById(id).value); return isNaN(v)?null:v; }
+function calcWashout(){
+  const b=num('w_basal'), p=num('w_portal'), d=num('w_tard');
+  const out=document.getElementById('w_out');
+  if(b!=null && b<=10){ out.innerHTML='Basal ≤ 10 UH → <b class="verde">adenoma rico en lípidos</b> (el washout no es necesario).'; return; }
+  if(p==null || d==null){ out.textContent='Introduce al menos portal y tardío (y basal para el absoluto).'; return; }
+  let h='';
+  const rel=(p-d)/p*100;
+  h+=`Washout relativo: <b>${rel.toFixed(0)} %</b>`;
+  if(b!=null){ const abs=(p-d)/(p-b)*100; h+=` · absoluto: <b>${abs.toFixed(0)} %</b>`; }
+  const aden = (b!=null && (p-d)/(p-b)*100>=60) || rel>=40;
+  h+= aden ? ' → <b class="verde">criterio de adenoma</b>' : ' → <b class="ambar">no cumple washout de adenoma: indeterminado</b>';
+  out.innerHTML=h;
+}
+function calcVol(){
+  const l=num('v_l'), ap=num('v_ap'), t=num('v_t'), psa=num('v_psa');
+  const out=document.getElementById('v_out');
+  if(l==null||ap==null||t==null){ out.textContent='Introduce los tres diámetros.'; return; }
+  const ml=l*ap*t*0.52/1000;   // mm³ → mL
+  let h=`Volumen ≈ <b>${ml.toFixed(1)} mL</b> (${(ml).toFixed(1)} cc)`;
+  if(psa!=null && ml>0){ const dens=psa/ml; h+=` · densidad PSA <b>${dens.toFixed(2)}</b>`+
+    (dens>=0.15?' <span class="rojo">(≥0,15: sospecha)</span>':' <span class="verde">(&lt;0,15)</span>'); }
+  out.innerHTML=h;
+}
+function calcVDVI(){
+  const vd=num('r_vd'), vi=num('r_vi');
+  const out=document.getElementById('r_out');
+  if(vd==null||vi==null||vi===0){ out.textContent='Introduce ambos diámetros.'; return; }
+  const r=vd/vi;
+  out.innerHTML=`VD/VI = <b>${r.toFixed(2)}</b> `+
+    (r>=1 ? '<span class="rojo">→ dilatación del VD (sobrecarga derecha)</span>' : '<span class="verde">→ dentro de límites</span>');
+}
+renderLista();
+</script>
+</body>
+</html>

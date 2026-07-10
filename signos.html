@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Para «Añadir a pantalla de inicio» en iPhone: se abre a pantalla completa como una app -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Signos Rx">
+<title>Banco de signos radiológicos</title>
+<style>
+  :root{
+    --tinta:#1a2238; --hueso:#f3f1ea; --papel:#fbfaf6; --ambar:#c4602a;
+    --verde:#2f6b4f; --rojo:#a33a3a; --gris:#7a7a72; --linea:#d9d5c8; --tapado:#e7e3d6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    background:var(--hueso);color:var(--tinta);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  header{border-bottom:1.5px solid var(--tinta);padding:18px 24px;
+    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  header h1{font-size:21px;font-weight:600}
+  header .sub{font-size:12px;color:var(--gris);letter-spacing:.04em;text-transform:uppercase}
+  header a{color:var(--ambar)}
+  .wrap{max-width:860px;margin:0 auto;padding:24px}
+  .barra{display:flex;gap:14px;flex-wrap:wrap;align-items:center;
+    padding:12px 0;border-bottom:1px solid var(--linea);margin-bottom:20px;font-size:13px;}
+  .barra label{color:var(--gris);margin-right:4px}
+  select{font-family:inherit;font-size:13px;border:1px solid var(--linea);border-radius:5px;
+    padding:5px 8px;background:var(--papel);color:var(--tinta);}
+  .chk{display:flex;align-items:center;gap:5px;color:var(--gris)}
+  .progreso{margin-left:auto;font-size:12px;color:var(--gris)}
+  .progreso b{color:var(--tinta)}
+  .btn{font-family:inherit;font-size:15px;border:1.5px solid var(--tinta);background:var(--tinta);
+    color:var(--hueso);padding:10px 22px;border-radius:6px;cursor:pointer;transition:.15s;}
+  .btn:hover{background:transparent;color:var(--tinta)}
+  .btn.sec{background:transparent;color:var(--tinta)}
+  .btn.sec:hover{background:var(--tinta);color:var(--hueso)}
+  .btn.rev{border-color:var(--ambar);background:var(--ambar);color:#fff}
+  .btn.rev:hover{background:#a64e1f;border-color:#a64e1f}
+  .btn.peq{font-size:12px;padding:5px 12px}
+  .carta{background:var(--papel);border:1px solid var(--linea);border-radius:10px;padding:26px;min-height:250px}
+  .etq{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);margin-bottom:10px}
+  .etq .chip{display:inline-block;border:1px solid var(--linea);border-radius:20px;padding:1px 10px;margin-left:6px;text-transform:none;letter-spacing:0}
+  .pregunta{font-size:20px;font-weight:600;margin-bottom:16px}
+  .respuesta{border-top:1px dashed var(--linea);padding-top:16px;margin-top:6px}
+  .respuesta .b{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--gris)}
+  .respuesta p{font-size:15px;margin:3px 0 14px}
+  .tapado{background:var(--tapado);border:1px dashed #c3bda9;border-radius:8px;
+    padding:20px;text-align:center;color:#8a8470;font-size:14px}
+  .acciones{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center}
+  .marca{font-size:13px;color:var(--gris);margin-left:auto}
+  .nav{display:flex;justify-content:space-between;margin-top:20px}
+  .atajos{text-align:center;font-size:11px;color:var(--gris);margin-top:12px}
+  .atajos b{color:var(--tinta)}
+  table.lista{width:100%;border-collapse:collapse;font-size:13px;background:var(--papel)}
+  table.lista th{font-size:11px;color:var(--gris);text-align:left;padding:6px 8px;border-bottom:1px solid var(--tinta)}
+  table.lista td{padding:6px 8px;border-bottom:1px solid var(--linea);vertical-align:top}
+  table.lista td:first-child{font-weight:600;white-space:nowrap}
+  .rep{color:var(--ambar);font-weight:700}
+  .oculto{display:none}
+  .aviso{font-size:12px;color:var(--gris);margin-top:24px;border-top:1px solid var(--linea);padding-top:12px;line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Banco de signos radiológicos</h1></div>
+  <div class="sub"><a href="index.html">‹ inicio</a> · el signo primero · el diagnóstico después</div>
+</header>
+
+<div class="wrap">
+  <div class="barra">
+    <span><label>Región</label><select id="fReg" onchange="nuevaSesion()"><option value="">todas</option></select></span>
+    <span><label>Modo</label>
+      <select id="fModo" onchange="nuevaSesion()">
+        <option value="directo">nombre → qué es</option>
+        <option value="inverso">descripción → nombre</option>
+      </select></span>
+    <span><label>Tanda</label>
+      <select id="fTanda" onchange="nuevaSesion()">
+        <option value="hoy">repaso de hoy</option>
+        <option value="todos">todos</option>
+      </select></span>
+    <button class="btn sec peq" onclick="verLista()">Lista completa</button>
+    <button class="btn sec peq" onclick="exportarSignos()" title="Descarga tu progreso (útil en iPhone, donde Safari puede borrar datos de webs poco visitadas)">⬇ copia</button>
+    <button class="btn sec peq" onclick="document.getElementById('impSignos').click()">⬆ importar</button>
+    <button class="btn sec peq" onclick="toggleSync()" title="Copia un código de texto en un dispositivo y pégalo en el otro: la forma fácil de llevar el progreso entre móvil y ordenador">Sync 📲</button>
+    <input type="file" id="impSignos" accept=".json" class="oculto">
+    <span class="progreso">Signo <b id="pIdx">0</b>/<b id="pTot">0</b> · vencidos hoy <b id="pVenc">0</b> · nuevos <b id="pNuev">0</b> · dominados <b id="pDom">0</b></span>
+  </div>
+
+  <div id="panelSync" class="oculto" style="background:var(--papel);border:1px solid var(--linea);border-radius:8px;padding:14px 16px;margin-bottom:18px;font-size:13px">
+    <p style="color:var(--gris);margin-bottom:8px">Lleva tu progreso entre el móvil y el ordenador sin archivos:
+      <b>copia</b> este código aquí y <b>pégalo</b> en el mismo panel del otro dispositivo (por notas, WhatsApp a ti mismo…).
+      Al aplicar se fusiona: gana la versión más avanzada de cada signo.</p>
+    <textarea id="taSync" spellcheck="false" style="width:100%;min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid var(--linea);border-radius:6px;padding:8px;background:#fff;color:var(--tinta)"></textarea>
+    <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn sec peq" onclick="copiarSync()">Copiar mi código</button>
+      <button class="btn sec peq" onclick="aplicarSync()">Aplicar código pegado</button>
+      <span id="syncEstado" style="color:var(--verde)"></span>
+    </div>
+  </div>
+
+  <div id="zonaLista" class="oculto"></div>
+  <div id="zonaCarta"></div>
+
+  <div class="nav" id="navBotones">
+    <button class="btn sec" id="btnPrev" onclick="ir(-1)">‹ Anterior</button>
+    <button class="btn sec" onclick="ir(1)">Siguiente ›</button>
+  </div>
+  <p class="atajos">Atajos · <b>Espacio</b> mostrar · <b>1</b> otra vez · <b>2</b> difícil · <b>3</b> bien · <b>4</b> fácil · <b>←/→</b> cambiar</p>
+
+  <p class="aviso">
+    <b>Repetición espaciada:</b> al calificar cada signo se programa su próximo repaso
+    (intervalos de 1 → 3 → 7 → 16 → 35 → 70 días). «Otra vez» lo devuelve al final de la
+    tanda actual; «Fácil» salta un nivel. La tanda «repaso de hoy» trae solo los vencidos
+    y los nuevos. El progreso se guarda en este navegador; usa «⬇ copia» de vez en cuando
+    (en iPhone, Safari puede borrar los datos de webs que no visitas en ~una semana).
+    Descripciones orientativas de estudio: contrasta siempre con tus textos de referencia
+    (Radiopaedia tiene entrada dedicada de casi todos, con imágenes de ejemplo).
+  </p>
+</div>
+
+<script>
+// nombre / región / modalidad / qué se ve / qué significa
+const SIGNOS=[
+// ── Tórax RX ──────────────────────────────────────────────────────────────
+['Signo de la silueta','Tórax','RX','Borramiento del contorno de una estructura (borde cardiaco, diafragma, aorta) por una opacidad adyacente de la misma densidad.','Localiza la lesión: está en contacto anatómico con la estructura borrada. Borra borde cardiaco derecho → lóbulo medio; borde izquierdo → língula; hemidiafragma → lóbulo inferior.'],
+['Broncograma aéreo','Tórax','RX/TC','Bronquios llenos de aire visibles como ramas radiolúcidas dentro de una opacidad pulmonar.','Ocupación alveolar con vía aérea permeable (neumonía, edema, hemorragia). Su presencia va en contra de obstrucción bronquial central completa.'],
+['Líneas B de Kerley','Tórax','RX','Líneas finas horizontales de ~1-2 cm en periferia de bases, que contactan con la pleura.','Engrosamiento de septos interlobulillares: edema intersticial (fallo cardiaco); si crónicas/irregulares, pensar en linfangitis carcinomatosa.'],
+['Signo de la S de Golden','Tórax','RX','Atelectasia de lóbulo superior derecho cuyo borde inferior dibuja una S invertida (convexidad central por masa).','Colapso lobar por masa central obstructiva: sospechar carcinoma broncogénico, sobre todo en fumador.'],
+['Luftsichel','Tórax','RX','Semiluna hiperclara paramediastínica superior izquierda (el segmento apical del LII hiperinsuflado rodea el arco aórtico).','Atelectasia del lóbulo superior izquierdo. En el adulto, obliga a descartar tumor central.'],
+['Joroba de Hampton','Tórax','RX/TC','Opacidad periférica triangular o en cúpula, de base pleural, habitualmente en bases.','Infarto pulmonar secundario a TEP.'],
+['Signo de Westermark','Tórax','RX','Oligohemia focal: zona de pulmón hiperclaro con vasos disminuidos de calibre.','TEP oclusivo proximal (signo poco sensible pero orientador).'],
+['Signo del surco profundo','Tórax','RX','En placa en decúbito supino, seno costofrénico anormalmente profundo y radiolúcido.','Neumotórax en paciente en supino (críticos, politrauma): el aire se acumula anterior e inferior, no apical.'],
+['Signo del menisco pleural','Tórax','RX','Opacidad basal homogénea de borde superior cóncavo que asciende hacia la pared lateral.','Derrame pleural.'],
+['Signo del dedo de guante','Tórax','RX/TC','Opacidades tubulares ramificadas en "V" o "Y" (bronquios rellenos de moco).','Impactación mucoide: ABPA, bronquiectasias, obstrucción bronquial (descartar lesión endobronquial).'],
+['Signo del diafragma continuo','Tórax','RX','El contorno diafragmático se ve continuo de lado a lado, por debajo de la silueta cardiaca.','Neumomediastino (aire interpuesto entre corazón y diafragma).'],
+// ── Tórax TC ──────────────────────────────────────────────────────────────
+['Signo del anillo de sello','Tórax','TC','Bronquio dilatado en corte axial junto a su arteria acompañante, más pequeña ("anillo" con "piedra").','Bronquiectasias (diámetro bronquial > arterial).'],
+['Árbol en brote (tree-in-bud)','Tórax','TC','Nodulillos centrolobulillares conectados a opacidades lineales ramificadas.','Bronquiolitis, típicamente infecciosa; diseminación endobronquial de TBC.'],
+['Empedrado (crazy paving)','Tórax','TC','Vidrio deslustrado con engrosamiento septal superpuesto (losetas de un empedrado).','Clásico de la proteinosis alveolar; también Pneumocystis, edema, hemorragia, COVID. Inespecífico: valorar contexto.'],
+['Signo del halo','Tórax','TC','Nódulo o masa rodeados de un halo de vidrio deslustrado.','En neutropénico febril, aspergilosis angioinvasiva (halo = hemorragia perilesional); también metástasis hemorrágicas.'],
+['Halo invertido (atolón)','Tórax','TC','Área de vidrio deslustrado central rodeada de un anillo de consolidación más denso.','Neumonía organizada (típico); también infarto pulmonar, TBC, mucormicosis.'],
+['Semiluna aérea (air crescent)','Tórax','TC','Media luna de aire que separa un fragmento sólido de la pared de una cavidad.','Aspergiloma que se moviliza dentro de una cavidad, o fase resolutiva de la aspergilosis angioinvasiva.'],
+['Cola de cometa (atelectasia redonda)','Tórax','TC','Vasos y bronquios que convergen en curva ("cola") hacia una masa subpleural, con pleura adyacente engrosada.','Atelectasia redonda (frecuente con enfermedad pleural por asbesto): pseudotumor, evitar biopsias innecesarias.'],
+// ── Abdomen RX ────────────────────────────────────────────────────────────
+['Signo de Rigler (doble pared)','Abdomen','RX','La pared intestinal se ve nítida porque hay aire a ambos lados (luminal y peritoneal).','Neumoperitoneo. Buscar también aire subdiafragmático en bipedestación.'],
+['Signo del grano de café','Abdomen','RX','Gran asa dilatada en U invertida que asciende desde la pelvis, con las paredes mediales apuestas formando el surco del "grano".','Vólvulo de sigma.'],
+['Signo del balón de fútbol','Abdomen','RX','Enorme radiolucencia ovalada que abomba el abdomen en supino, con el ligamento falciforme visible.','Neumoperitoneo masivo (típico descrito en niños).'],
+['Aerobilia','Abdomen','RX/TC','Aire en la vía biliar, de predominio CENTRAL (hiliar).','Normal tras CPRE/esfinterotomía o derivación. Sin ese antecedente: fístula bilioentérica → buscar íleo biliar (tríada de Rigler: aerobilia + obstrucción de delgado + cálculo ectópico).'],
+// ── Abdomen TC/ECO ────────────────────────────────────────────────────────
+['Signo del remolino (whirl)','Abdomen','TC','Vasos y grasa mesentérica arremolinados en espiral alrededor de un eje.','Torsión: vólvulo intestinal (incluido vólvulo de intestino medio por malrotación), torsión ovárica o de otro pedículo.'],
+['Signo de la diana / donut','Abdomen','ECO/TC','Anillos concéntricos: un asa (y su mesenterio) metida dentro de otra.','Invaginación intestinal. En el adulto, buscar la lesión que hace de cabeza de invaginación.'],
+['Pico de pájaro','Abdomen','TC/contraste','Afilamiento progresivo de la luz hacia un punto ("pico").','Punto de torsión de un vólvulo (sigma); en esofagograma, acalasia.'],
+['Media luna hiperdensa en AAA','Abdomen','TC','Semiluna espontáneamente hiperdensa dentro del trombo mural o la pared de un aneurisma aórtico.','Hematoma mural agudo: signo de inestabilidad, rotura inminente o en curso. Avisar YA.'],
+['Aorta drapeada','Abdomen','TC','La pared posterior de la aorta pierde su plano graso y "se amolda" al cuerpo vertebral.','Rotura contenida de aneurisma aórtico.'],
+['Mesenterio brumoso (misty mesentery)','Abdomen','TC','Aumento difuso de la densidad de la grasa mesentérica, mal definido.','Inespecífico: paniculitis mesentérica, edema, hemorragia, linfoma. Correlacionar (adenopatías, contexto).'],
+['Neumatosis + gas portal','Abdomen','TC','Gas en la pared intestinal y ramificaciones aéreas PERIFÉRICAS en el hígado (el gas portal llega a periferia; la aerobilia queda central).','Isquemia mesentérica evolucionada con necrosis: gravedad alta. Distinguir gas portal (periférico) de aerobilia (central).'],
+['Signo del cinturón de seguridad','Abdomen','TC','Contusión en banda de la pared abdominal tras accidente, con líquido/mesenterio "sucio" adyacente.','Alta asociación con lesión de víscera hueca y mesenterio: buscarlas activamente, no conformarse con "sin lesión de órgano sólido".'],
+['Murphy ecográfico','Abdomen','ECO','Dolor máximo y selectivo al comprimir la vesícula con la sonda.','Apoya colecistitis aguda (junto a litiasis, pared >3 mm y líquido perivesicular).'],
+['Signo WES (wall-echo-shadow)','Abdomen','ECO','Dos líneas ecogénicas (pared + superficie de los cálculos) con gran sombra posterior: vesícula contraída llena de litiasis.','Colelitiasis con vesícula escleroatrófica. No confundir con asa con gas.'],
+['Pseudorriñón','Abdomen','ECO','Estructura que remeda un riñón: centro ecogénico (luz) con corteza gruesa hipoecoica (pared engrosada).','Engrosamiento mural intestinal significativo (neoplasia, invaginación, inflamación): completar con TC.'],
+['Cola de cometa vesicular','Abdomen','ECO','Artefacto de reverberación corto y triangular que cuelga de un foco ecogénico de la pared vesicular.','Adenomiomatosis (cristales de colesterol en senos de Rokitansky-Aschoff). Benigno; no confundir con litiasis.'],
+['Ojo de buey hepático','Abdomen','ECO','Lesión focal con centro ecogénico y halo hipoecoico periférico.','Sugerente de metástasis hepática (halo = tumor viable/compresión). Buscar primario y más lesiones.'],
+['Tormenta de nieve','Abdomen','ECO','Ecos brillantes difusos con sombra "sucia" que borra los planos profundos.','En mama: rotura extracapsular de prótesis (siliconoma). En obstetricia: mola hidatiforme (descripción clásica).'],
+// ── Neuro ─────────────────────────────────────────────────────────────────
+['ACM hiperdensa','Neuro','TC','La arteria cerebral media se ve espontáneamente más densa que las demás arterias en el TC sin contraste.','Trombo agudo en ACM: ictus isquémico hiperagudo. Correlacionar con clínica y activar código ictus.'],
+['Pérdida del ribete insular','Neuro','TC','Borramiento de la diferenciación córtico-subcortical de la ínsula.','Signo precoz de isquemia en territorio de ACM (se valora en el ASPECTS).'],
+['Signo del delta vacío','Neuro','TC con CIV','Defecto de repleción triangular en el seno sagital superior con realce de la duramadre alrededor.','Trombosis de senos venosos cerebrales. En el TC simple buscar el seno espontáneamente denso.'],
+['Signo de la cola dural','Neuro','RM con CIV','Realce dural adyacente a una masa extraaxial que se va afilando al alejarse.','Típico (no patognomónico) de meningioma.'],
+['Ojos de mapache','Neuro','Clínico/TC','Equimosis periorbitaria bilateral tras traumatismo.','Sugiere fractura de base de cráneo anterior: buscarla en el TC (y neumoencéfalo, ocupación de senos).'],
+// ── Musculoesquelético ────────────────────────────────────────────────────
+['Signo de la vela (almohadilla grasa)','MSK','RX','Elevación de la almohadilla grasa anterior del codo ("vela") y/o visualización de la posterior (siempre patológica).','Derrame articular del codo: en el niño, buscar fractura supracondílea; en el adulto, fractura de cúpula radial (aunque no se vea el trazo).'],
+['Fractura de Segond','MSK','RX','Pequeña avulsión cortical vertical en el margen lateral de la meseta tibial.','Marcador de rotura del ligamento cruzado anterior (asociación casi constante): pedir/valorar RM.'],
+['Vértebra de marfil','MSK','RX/TC','Cuerpo vertebral difusamente denso (blanco) con morfología conservada.','Metástasis blástica (próstata, mama), linfoma o Paget. Correlacionar con edad y contexto.'],
+['Signo de la doble línea','MSK','RM','En T2, línea externa hipointensa (esclerosis) con línea interna hiperintensa (tejido de granulación) delimitando una zona serpiginosa.','Osteonecrosis / infarto óseo (muy característico).'],
+['Signo de la semiluna subcondral','MSK','RX/TC','Línea radiolúcida curvilínea inmediatamente bajo el hueso subcondral de la cabeza femoral.','Necrosis avascular con fractura subcondral: riesgo de colapso inminente de la superficie articular.'],
+// ── Urología / vascular ───────────────────────────────────────────────────
+['Signo del anillo ureteral (rim sign)','Abdomen','TC','Halo de partes blandas (pared ureteral edematosa) rodeando una calcificación pélvica.','Apoya que la calcificación es un cálculo ureteral y no un flebolito (el flebolito suele tener "cola de cometa" venosa y centro claro).'],
+['Signo del yin-yang','Vascular','ECO Doppler/TC','Flujo bidireccional arremolinado (mitad roja, mitad azul) dentro de un saco conectado a una arteria.','Pseudoaneurisma (buscar el cuello). En TC, saco con realce arterial junto al vaso.'],
+// ── Ampliación (2ª tanda) ───────────────────────────────────────────────────
+// ── Tórax ──
+['Signo de la vela tímica (spinnaker/sail)','Tórax','RX','En lactante, el timo elevado por aire mediastínico dibuja una vela a ambos lados.','Neumomediastino en el neonato/lactante.'],
+['Signo cervicotorácico','Tórax','RX','Una opacidad mediastínica cuyo borde se sigue por encima de las clavículas.','La lesión es posterior (mediastino posterior); si el borde se borra al llegar a la clavícula, es anterior.'],
+['Signo del hilio tapado (hilum overlay)','Tórax','RX','Los vasos hiliares se ven a través de una masa proyectada sobre el hilio.','La masa NO nace del hilio (está por delante o por detrás): ayuda a distinguir masa mediastínica de crecimiento hiliar/vascular.'],
+['Signo de la convergencia hiliar','Tórax','RX','Los vasos pulmonares convergen hacia una masa hiliar.','La masa ES vascular/hiliar (a diferencia del hilio tapado, donde convergen hacia el hilio por detrás de la masa).'],
+['Signo del bronquio en dedo de guante','Tórax','TC','Impactación mucosa dilatando bronquios en morfología en Y/V.','ABPA, atresia bronquial, obstrucción endobronquial.'],
+['Signo de la arteria nutricia (feeding vessel)','Tórax','TC','Un vaso pulmonar que se dirige directamente a un nódulo.','Sugiere origen hematógeno: émbolos sépticos o metástasis.'],
+['Signo del halo invertido con nódulos','Tórax','TC','Halo invertido cuyo anillo contiene micronódulos.','Sugiere sarcoidosis o infección granulomatosa más que neumonía organizada.'],
+['Patrón en mosaico','Tórax','TC','Áreas de distinta atenuación pulmonar en tablero de ajedrez.','Enfermedad de pequeña vía aérea, vascular (TEP crónico) o infiltrativa; el TC en espiración distingue atrapamiento aéreo.'],
+['Signo de Macklin','Tórax','TC','Aire disecando las vainas broncovasculares hacia el mediastino.','Neumomediastino por barotrauma/rotura alveolar (no por lesión de vía aérea o esófago).'],
+['Signo de la silueta hiliar perdida','Tórax','RX','Aumento de densidad del hilio con pérdida de su contorno.','Masa o adenopatías hiliares; comparar con el lado contralateral.'],
+// ── Abdomen ──
+['Signo de la cuerda (string sign)','Abdomen','TC/tránsito','Segmento de íleon estrecho y filiforme por espasmo/estenosis.','Enfermedad de Crohn (ileítis); en píloro, estenosis hipertrófica.'],
+['Signo del peine (comb sign)','Abdomen','TC','Ingurgitación de los vasos rectos mesentéricos, paralelos como púas de peine.','Actividad inflamatoria del Crohn (hiperemia mesentérica).'],
+['Signo del halo / diana intestinal','Abdomen','TC','Estratificación mural en capas concéntricas por edema submucoso.','Inflamación de la pared (enteritis, colitis, isquemia no transmural): pared viable con edema.'],
+['Signo de la grasa perivesicular','Abdomen','TC','Rarefacción de la grasa alrededor de la vesícula con pared engrosada.','Colecistitis aguda (correlato del Murphy ecográfico en TC).'],
+['Signo del cálculo diminuto en cuello','Abdomen','ECO','Litiasis impactada en el infundíbulo vesicular con sombra.','Colecistitis obstructiva; buscar Murphy y pared >3 mm.'],
+['Signo de la doble burbuja','Abdomen','RX','Dos burbujas aéreas: estómago y bulbo duodenal dilatados, sin gas distal.','Atresia/obstrucción duodenal (neonato); en el adulto, considerar páncreas anular o brida.'],
+['Signo de la triple burbuja','Abdomen','RX','Tres niveles de gas (estómago, duodeno y yeyuno proximal).','Obstrucción yeyunal proximal.'],
+['Pila de monedas (stack of coins)','Abdomen','RX/tránsito','Asas de delgado con pliegues finos, regulares y paralelos.','Hemorragia intramural / isquemia de intestino delgado; también obstrucción.'],
+['Signo de las heces en intestino delgado','Abdomen','TC','Material con burbujas simulando heces dentro de asas de delgado dilatadas.','Marca el punto de transición de una obstrucción de delgado (small bowel feces sign).'],
+['Signo del blanco/diana en apendicitis','Abdomen','ECO','Apéndice en corte transversal, no compresible, >6 mm, en capas.','Apendicitis aguda; buscar apendicolito y grasa ecogénica alrededor.'],
+['Signo del anillo de realce','Abdomen','TC','Absceso con pared que capta contraste rodeando contenido hipodenso.','Colección organizada/absceso (apendicular, diverticular, hepático).'],
+['Signo de la rueda dentada','Abdomen','ECO','Trompa dilatada con pliegues engrosados que remedan una rueda dentada (cogwheel).','Enfermedad inflamatoria pélvica: piosálpinx/hidrosálpinx.'],
+['Signo del collar de perlas','Abdomen','ECO','Pequeños quistes en la pared de una trompa dilatada, alineados.','Salpingitis crónica (beads-on-a-string).'],
+['Signo de la semiluna de líquido perihepático','Abdomen','ECO','Lámina anecoica en el receso hepatorrenal (Morrison).','Líquido libre: en trauma (FAST +) o ascitis.'],
+['Nódulo de la hermana María José','Abdomen','TC/clínico','Nódulo umbilical metastásico.','Carcinomatosis peritoneal (típicamente gástrica, ovárica o pancreática).'],
+['Signo del bazo errante','Abdomen','TC','Bazo fuera de su lecho, con pedículo largo, a veces con remolino vascular.','Torsión de bazo errante (urgencia por infarto esplénico).'],
+['Signo del anillo graso (fat ring)','Abdomen','TC','Nódulo graso con anillo hiperdenso y foco central, junto al colon.','Apendagitis epiploica o infarto omental: dolor agudo autolimitado, evita cirugía innecesaria.'],
+['Signo de la vesícula en porcelana','Abdomen','TC/RX','Pared vesicular calcificada.','Vesícula porcelana: riesgo aumentado de carcinoma; valorar colecistectomía.'],
+['Signo del menisco / cáliz en invaginación','Abdomen','enema','Columna de contraste detenida con forma de menisco.','Invaginación intestinal (también útil su reducción hidrostática).'],
+// ── Neuro ──
+['Signo de la cuerda densa (dense vein)','Neuro','TC','Vena cortical o seno espontáneamente hiperdensos.','Trombosis venosa cortical/senos (equivalente venoso de la ACM densa).'],
+['Signo del molino de viento / target','Neuro','RM','Lesión con anillos concéntricos en sustancia blanca.','Esclerosis múltiple tumefacta o absceso; correlacionar con difusión (absceso restringe).'],
+['Signo del reloj de arena','Neuro','RM','Tumor que atraviesa un agujero de conjunción con morfología bilobulada.','Schwannoma/neurofibroma (típico en raíces espinales).'],
+['Signo del riñón/haba en hematoma','Neuro','TC','Colección extraaxial en forma de semiluna que cruza suturas.','Hematoma subdural (a diferencia del epidural, biconvexo y limitado por suturas).'],
+['Signo de la lente biconvexa','Neuro','TC','Colección extraaxial biconvexa que NO cruza suturas.','Hematoma epidural (arterial, meníngea media); vigilar intervalo lúcido.'],
+['Signo del remolino en hematoma','Neuro','TC','Zonas hipodensas dentro de un hematoma agudo hiperdenso.','Sangrado activo: hematoma en expansión (swirl sign), peor pronóstico.'],
+['Signo del colibrí / pingüino','Neuro','RM sagital','Atrofia del mesencéfalo que recuerda un colibrí.','Parálisis supranuclear progresiva.'],
+['Signo de la oreja de Mickey Mouse','Neuro','RM axial','Mesencéfalo con morfología alterada por atrofia tegmental.','Degeneraciones del tronco (PSP y afines).'],
+['Signo del ojo de tigre','Neuro','RM','Hipointensidad en globo pálido con foco central hiperintenso (T2).','Neurodegeneración con acúmulo de hierro (PKAN).'],
+// ── MSK ──
+['Signo de la almohadilla grasa (codo)','MSK','RX','Elevación de las almohadillas grasas del codo por derrame.','Fractura oculta (cúpula radial en adulto, supracondílea en niño).'],
+['Signo de Terry Thomas','MSK','RX','Ensanchamiento del espacio escafolunar (>3 mm).','Disociación escafolunar (rotura del ligamento).'],
+['Signo del anillo cortical (escafoides)','MSK','RX','Anillo cortical del escafoides por rotación en flexión.','Inestabilidad escafolunar / rotación del escafoides.'],
+['Signo de la doble línea PCL','MSK','RM','Ligamento cruzado posterior con curvatura anómala (buckled).','Rotura del ligamento cruzado ANTERIOR (el PCL se relaja).'],
+['Signo del surco intercondíleo profundo','MSK','RX/RM','Escotadura profunda en el cóndilo femoral lateral.','Marcador de rotura de LCA (junto a la fractura de Segond).'],
+['Signo del labio en Hill-Sachs','MSK','RX/TC','Muesca en la cara posterolateral de la cabeza humeral.','Impactación por luxación anterior recidivante de hombro.'],
+['Perrito de La Chapelle (Scottie dog)','MSK','RX oblicua','Silueta de perro en la columna lumbar oblicua; el "collar" es la pars.','Collar roto = espondilólisis (fractura de la pars interarticularis).'],
+['Signo de la vértebra en H','MSK','RX/RM','Depresión de los platillos centrales (aspecto en H o de Lincoln).','Infartos óseos vertebrales de la drepanocitosis.'],
+['Signo del sacabocados','MSK','RX','Lesiones líticas de bordes netos, sin esclerosis.','Mieloma múltiple (a diferencia de las metástasis, sin reacción ósea).'],
+// ── Vascular / cuello ──
+['Signo de la llama (flame sign)','Vascular','angio/TC','Terminación afilada en llama de un vaso ocluido.','Oclusión trombótica/embólica arterial aguda.'],
+['Signo del cordón (carótida)','Vascular','angio/TC','Luz filiforme residual en la carótida interna.','Suboclusión crítica (near-occlusion); relevante para decidir tratamiento.'],
+['Signo del pico de loro / doble luz','Vascular','TC','Flap intimal separando dos luces con morfología en pico.','Disección arterial (aórtica o de troncos supraaórticos).'],
+// ── 3ª tanda ─────────────────────────────────────────────────────────────────
+// ── Cardio (RX) ──
+['Signo de la doble densidad','Cardio','RX','Doble contorno en el borde cardiaco derecho.','Crecimiento de la aurícula izquierda (valvulopatía mitral).'],
+['Corazón en zueco (coeur en sabot)','Cardio','RX','Ápex elevado y concavidad del segmento pulmonar; silueta en bota.','Tetralogía de Fallot.'],
+['Signo del muñeco de nieve / 8','Cardio','RX','Silueta cardiomediastínica en forma de 8 o muñeco de nieve.','Drenaje venoso pulmonar anómalo total supracardiaco.'],
+['Huevo colgado de un hilo (egg on a string)','Cardio','RX','Mediastino superior estrecho con corazón ovoide.','Transposición de grandes arterias.'],
+['Signo del 3','Cardio','RX','Escotadura en el contorno del botón aórtico (forma de 3).','Coartación aórtica.'],
+['Muescas costales de Roesler','Cardio','RX','Erosiones en el borde inferior de las costillas posteriores.','Circulación colateral por coartación aórtica.'],
+// ── Cuello / vía aérea pediátrica ──
+['Signo del pulgar (thumbprint)','Cuello','RX','Epiglotis engrosada y redondeada en la proyección lateral.','Epiglotitis aguda (urgencia de vía aérea).'],
+['Signo del campanario (steeple)','Cuello','RX','Estrechamiento subglótico simétrico en punta de lápiz (AP).','Laringotraqueítis (croup).'],
+// ── Tórax / abdomen ──
+['Signo del nenúfar / camalote (water lily)','Tórax','RX/TC','Membrana ondulada flotando dentro de un quiste.','Quiste hidatídico complicado (rotura de la membrana germinal).'],
+['Signo de Chilaiditi','Abdomen','RX/TC','Colon con haustras interpuesto entre hígado y diafragma.','Seudoneumoperitoneo: variante normal, NO operar (distinguir de aire libre).'],
+['Signo del sacacorchos esofágico','Abdomen','tránsito/TC','Contracciones terciarias en tirabuzón del esófago.','Espasmo esofágico distal / trastorno motor.'],
+['Signo de la manzana mordida (apple core)','Abdomen','tránsito/TC','Estenosis anular corta con "hombros" salientes.','Carcinoma anular de colon.'],
+['Signo de la escalera (stepladder)','Abdomen','RX','Niveles hidroaéreos escalonados en asas dilatadas.','Obstrucción de intestino delgado.'],
+['Signo de la garra (claw sign)','Abdomen','TC/ECO','El órgano abraza la masa formando ángulos agudos.','La lesión nace de ese órgano (define el origen).'],
+['Signo del doble conducto (double duct)','Abdomen','TC/RM','Dilatación conjunta de colédoco y conducto de Wirsung.','Lesión obstructiva en cabeza de páncreas o ampolla de Vater.'],
+['Cabeza de Medusa (caput medusae)','Abdomen','TC/clínico','Venas dilatadas que irradian desde el ombligo.','Hipertensión portal (recanalización de la vena paraumbilical).'],
+['Signo del anillo de fuego (ring of fire)','Abdomen','ECO Doppler','Halo vascular hiperémico rodeando una estructura anexial.','Cuerpo lúteo o embarazo ectópico (inespecífico: correlacionar con βhCG y clínica).'],
+// ── Neuro ──
+['Signo de la cinta cortical (cortical ribboning)','Neuro','RM (DWI)','Restricción de la difusión giriforme siguiendo la corteza.','Creutzfeldt-Jakob / encefalopatía (correlacionar con clínica).'],
+['Signo del pulvinar / palo de hockey','Neuro','RM','Hiperseñal en pulvinar y núcleo dorsomedial del tálamo.','Variante de la enfermedad de Creutzfeldt-Jakob.'],
+['Signo de la cruz pontina (hot cross bun)','Neuro','RM','Hiperseñal en cruz en la protuberancia (T2).','Atrofia multisistémica (variante cerebelosa).'],
+['Signo del diente de molar (molar tooth)','Neuro','RM','Pedúnculos cerebelosos superiores gruesos y horizontales; fosa interpeduncular profunda.','Síndrome de Joubert.'],
+// ── MSK ──
+['Triángulo de Codman','MSK','RX','Reacción perióstica angular levantada en el borde de la lesión.','Tumor óseo agresivo (osteosarcoma, Ewing, osteomielitis).'],
+['Rayos de sol (sunburst)','MSK','RX','Espículas óseas perpendiculares a la cortical.','Osteosarcoma (reacción perióstica agresiva).'],
+['Piel de cebolla (onion skin)','MSK','RX','Perióstio laminado en capas concéntricas.','Sarcoma de Ewing (u osteomielitis).'],
+['Fragmento caído (fallen fragment)','MSK','RX','Fragmento óseo desplazado a la parte declive de una lesión lítica.','Quiste óseo simple fracturado (patognomónico).'],
+['Vértebra en marco (picture frame)','MSK','RX','Contorno vertebral engrosado con centro rarefacto.','Enfermedad de Paget.'],
+['Signo del algodón (cotton wool)','MSK','RX','Áreas escleróticas algodonosas en el cráneo.','Enfermedad de Paget (fase mixta).'],
+['Tibia en sable','MSK','RX','Arqueamiento anterior de una tibia engrosada.','Enfermedad de Paget (o sífilis).'],
+['Signo de Wimberger','MSK','RX','Erosión de la esquina metafisaria con anillo epifisario denso.','Escorbuto (también sífilis congénita).'],
+];
+
+// Término de búsqueda en INGLÉS para el enlace a Radiopaedia (web en inglés):
+// con el nombre español muchos signos no se encontrarían. Si un signo no está
+// aquí, se usa su nombre español como respaldo (radioTerm()).
+const EN={
+'Signo de la silueta':'silhouette sign','Broncograma aéreo':'air bronchogram',
+'Líneas B de Kerley':'Kerley B lines','Signo de la S de Golden':'Golden S sign',
+'Luftsichel':'Luftsichel sign','Joroba de Hampton':'Hampton hump','Signo de Westermark':'Westermark sign',
+'Signo del surco profundo':'deep sulcus sign','Signo del menisco pleural':'pleural meniscus sign',
+'Signo del dedo de guante':'finger in glove sign','Signo del diafragma continuo':'continuous diaphragm sign',
+'Signo del anillo de sello':'signet ring sign','Árbol en brote (tree-in-bud)':'tree-in-bud',
+'Empedrado (crazy paving)':'crazy paving','Signo del halo':'CT halo sign',
+'Halo invertido (atolón)':'reversed halo sign','Semiluna aérea (air crescent)':'air crescent sign',
+'Cola de cometa (atelectasia redonda)':'round atelectasis comet tail','Signo de Rigler (doble pared)':'Rigler sign',
+'Signo del grano de café':'coffee bean sign','Signo del balón de fútbol':'football sign abdomen',
+'Aerobilia':'pneumobilia','Signo del remolino (whirl)':'whirl sign',
+'Signo de la diana / donut':'target sign intussusception','Pico de pájaro':'bird beak sign',
+'Media luna hiperdensa en AAA':'hyperdense crescent sign aortic aneurysm','Aorta drapeada':'draped aorta sign',
+'Mesenterio brumoso (misty mesentery)':'misty mesentery','Neumatosis + gas portal':'pneumatosis portal venous gas',
+'Signo del cinturón de seguridad':'seatbelt sign','Murphy ecográfico':'sonographic Murphy sign',
+'Signo WES (wall-echo-shadow)':'wall echo shadow sign','Pseudorriñón':'pseudokidney sign',
+'Cola de cometa vesicular':'comet tail artifact adenomyomatosis','Ojo de buey hepático':'target lesion liver metastasis',
+'Tormenta de nieve':'snowstorm sign','ACM hiperdensa':'hyperdense MCA sign',
+'Pérdida del ribete insular':'insular ribbon sign','Signo del delta vacío':'empty delta sign',
+'Signo de la cola dural':'dural tail sign','Ojos de mapache':'raccoon eyes',
+'Signo de la vela (almohadilla grasa)':'sail sign elbow fat pad','Fractura de Segond':'Segond fracture',
+'Vértebra de marfil':'ivory vertebra','Signo de la doble línea':'double line sign osteonecrosis',
+'Signo de la semiluna subcondral':'crescent sign avascular necrosis','Signo del anillo ureteral (rim sign)':'ureteric rim sign',
+'Signo del yin-yang':'yin yang sign pseudoaneurysm','Signo de la vela tímica (spinnaker/sail)':'spinnaker sign',
+'Signo cervicotorácico':'cervicothoracic sign','Signo del hilio tapado (hilum overlay)':'hilum overlay sign',
+'Signo de la convergencia hiliar':'hilum convergence sign','Signo del bronquio en dedo de guante':'finger in glove sign',
+'Signo de la arteria nutricia (feeding vessel)':'feeding vessel sign','Signo del halo invertido con nódulos':'reversed halo sign sarcoidosis',
+'Patrón en mosaico':'mosaic attenuation','Signo de Macklin':'Macklin effect',
+'Signo de la silueta hiliar perdida':'hilar mass hilum overlay','Signo de la cuerda (string sign)':'string sign Crohn',
+'Signo del peine (comb sign)':'comb sign','Signo del halo / diana intestinal':'bowel wall target sign',
+'Signo de la grasa perivesicular':'pericholecystic fat stranding cholecystitis','Signo del cálculo diminuto en cuello':'impacted gallstone cholecystitis',
+'Signo de la doble burbuja':'double bubble sign','Signo de la triple burbuja':'triple bubble sign',
+'Pila de monedas (stack of coins)':'stack of coins sign','Signo de las heces en intestino delgado':'small bowel feces sign',
+'Signo del blanco/diana en apendicitis':'target sign appendicitis','Signo del anillo de realce':'rim enhancement abscess',
+'Signo de la rueda dentada':'cogwheel sign fallopian tube','Signo del collar de perlas':'beads on a string fallopian tube',
+'Signo de la semiluna de líquido perihepático':'Morison pouch free fluid FAST','Nódulo de la hermana María José':'Sister Mary Joseph nodule',
+'Signo del bazo errante':'wandering spleen','Signo del anillo graso (fat ring)':'hyperattenuating ring sign epiploic appendagitis',
+'Signo de la vesícula en porcelana':'porcelain gallbladder','Signo del menisco / cáliz en invaginación':'meniscus sign intussusception',
+'Signo de la cuerda densa (dense vein)':'cord sign cerebral venous thrombosis','Signo del molino de viento / target':'target sign tumefactive multiple sclerosis',
+'Signo del reloj de arena':'dumbbell tumor nerve sheath','Signo del riñón/haba en hematoma':'subdural hematoma crescent',
+'Signo de la lente biconvexa':'epidural hematoma lentiform','Signo del remolino en hematoma':'swirl sign hematoma',
+'Signo del colibrí / pingüino':'hummingbird sign progressive supranuclear palsy','Signo de la oreja de Mickey Mouse':'Mickey Mouse sign midbrain',
+'Signo del ojo de tigre':'eye of the tiger sign','Signo de la almohadilla grasa (codo)':'elbow fat pad sign',
+'Signo de Terry Thomas':'Terry Thomas sign','Signo del anillo cortical (escafoides)':'cortical ring sign scaphoid',
+'Signo de la doble línea PCL':'PCL buckling ACL tear','Signo del surco intercondíleo profundo':'deep lateral femoral notch sign',
+'Signo del labio en Hill-Sachs':'Hill-Sachs lesion','Perrito de La Chapelle (Scottie dog)':'Scottie dog spondylolysis',
+'Signo de la vértebra en H':'H-shaped vertebra sickle cell','Signo del sacabocados':'punched out lesions myeloma',
+'Signo de la llama (flame sign)':'flame sign arterial occlusion','Signo del cordón (carótida)':'carotid string sign',
+'Signo del pico de loro / doble luz':'aortic dissection double lumen','Signo de la doble densidad':'double density sign left atrial enlargement',
+'Corazón en zueco (coeur en sabot)':'coeur en sabot tetralogy of Fallot','Signo del muñeco de nieve / 8':'snowman sign TAPVR',
+'Huevo colgado de un hilo (egg on a string)':'egg on a string transposition','Signo del 3':'figure 3 sign coarctation',
+'Muescas costales de Roesler':'rib notching coarctation','Signo del pulgar (thumbprint)':'thumbprint sign epiglottitis',
+'Signo del campanario (steeple)':'steeple sign croup','Signo del nenúfar / camalote (water lily)':'water lily sign hydatid',
+'Signo de Chilaiditi':'Chilaiditi sign','Signo del sacacorchos esofágico':'corkscrew esophagus',
+'Signo de la manzana mordida (apple core)':'apple core sign colon','Signo de la escalera (stepladder)':'step ladder sign small bowel obstruction',
+'Signo de la garra (claw sign)':'claw sign','Signo del doble conducto (double duct)':'double duct sign',
+'Cabeza de Medusa (caput medusae)':'caput medusae','Signo del anillo de fuego (ring of fire)':'ring of fire sign',
+'Signo de la cinta cortical (cortical ribboning)':'cortical ribboning CJD','Signo del pulvinar / palo de hockey':'pulvinar sign hockey stick CJD',
+'Signo de la cruz pontina (hot cross bun)':'hot cross bun sign','Signo del diente de molar (molar tooth)':'molar tooth sign Joubert',
+'Triángulo de Codman':'Codman triangle','Rayos de sol (sunburst)':'sunburst periosteal reaction osteosarcoma',
+'Piel de cebolla (onion skin)':'onion skin periosteal reaction Ewing','Fragmento caído (fallen fragment)':'fallen fragment sign',
+'Vértebra en marco (picture frame)':'picture frame vertebra Paget','Signo del algodón (cotton wool)':'cotton wool skull Paget',
+'Tibia en sable':'sabre tibia','Signo de Wimberger':'Wimberger sign'
+};
+function radioTerm(nombre){ return EN[nombre]||nombre; }
+
+// ── Estado: repetición espaciada tipo Anki ───────────────────────────────────
+// Por signo: {n: nivel 0-5, p: timestamp del próximo repaso, v: veces visto}.
+// Calificas cada carta (Otra vez / Difícil / Bien / Fácil) y el intervalo
+// crece con la ESCALA; «Otra vez» además reencola la carta en la tanda actual.
+const LS_KEY='signos_srs_v1';
+const LS_VIEJO='signos_repasar_v1';   // formato antiguo ('se'|'rep'): se migra
+const DIA=86400000;
+const ESCALA=[1,3,7,16,35,70];   // días entre repasos según nivel
+let SRS={};
+try{ const r=localStorage.getItem(LS_KEY); if(r) SRS=JSON.parse(r)||{}; }catch(e){}
+if(!Object.keys(SRS).length){
+  try{
+    const v=JSON.parse(localStorage.getItem(LS_VIEJO)||'{}');
+    for(const [k,m] of Object.entries(v))
+      SRS[k]= m==='se' ? {n:1,p:Date.now()+3*DIA,v:1} : {n:0,p:Date.now(),v:1};
+    if(Object.keys(SRS).length){ persistir(); localStorage.removeItem(LS_VIEJO); }
+  }catch(e){}
+}
+function persistir(){ try{ localStorage.setItem(LS_KEY,JSON.stringify(SRS)); }catch(e){} }
+function esNuevo(s){ return !SRS[s[0]]; }
+function vencido(s){ const e=SRS[s[0]]; return !!(e && e.p<=Date.now()); }
+function dominado(s){ const e=SRS[s[0]]; return !!(e && e.n>=4); }
+function nivelTras(g,nPrev){
+  if(g==='otra')    return 0;
+  if(g==='dificil') return Math.max(0,nPrev-1);
+  if(g==='bien')    return Math.min(ESCALA.length-1,nPrev+1);
+  return Math.min(ESCALA.length-1,nPrev+2);   // fácil: salta un nivel
+}
+function etiquetaDias(g,s){
+  const e=SRS[s[0]];
+  return ESCALA[nivelTras(g, e?e.n:0)]+' d';
+}
+
+let mazo=[], i=0, mostrado=false, enLista=false;
+function esc(s){ return (s==null?'':s.toString()).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function barajar(a){ for(let k=a.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
+
+// Recordar los filtros elegidos (región/modo/tanda) entre visitas
+const FILTROS_KEY='signos_filtros_v1';
+function guardarFiltros(){
+  try{ localStorage.setItem(FILTROS_KEY, JSON.stringify({
+    reg:document.getElementById('fReg').value,
+    modo:document.getElementById('fModo').value,
+    tanda:document.getElementById('fTanda').value})); }catch(e){}
+}
+function cargarFiltros(){
+  try{ const f=JSON.parse(localStorage.getItem(FILTROS_KEY)||'{}');
+    // la región solo se aplica si sigue existiendo como opción
+    if(f.reg && [...document.getElementById('fReg').options].some(o=>o.value===f.reg))
+      document.getElementById('fReg').value=f.reg;
+    if(f.modo) document.getElementById('fModo').value=f.modo;
+    if(f.tanda) document.getElementById('fTanda').value=f.tanda;
+  }catch(e){}
+}
+function nuevaSesion(){
+  guardarFiltros();
+  const reg=document.getElementById('fReg').value;
+  const tanda=document.getElementById('fTanda').value;
+  const base=SIGNOS.filter(s=>!reg||s[1]===reg);
+  if(tanda==='hoy') mazo=barajar(base.filter(vencido)).concat(barajar(base.filter(esNuevo)));
+  else mazo=barajar(base.slice());
+  i=0; mostrado=false; enLista=false;
+  document.getElementById('zonaLista').classList.add('oculto');
+  document.getElementById('zonaCarta').classList.remove('oculto');
+  document.getElementById('navBotones').classList.remove('oculto');
+  render();
+}
+function render(){
+  const zona=document.getElementById('zonaCarta');
+  actualizarProgreso();
+  if(!mazo.length){
+    const esHoy=document.getElementById('fTanda').value==='hoy';
+    zona.innerHTML='<div class="tapado">'+(esHoy
+      ?'Sin repasos vencidos ni signos nuevos hoy con estos filtros. ¡Al día! Vuelve mañana o cambia la tanda a «todos».'
+      :'No hay signos con estos filtros.')+'</div>';
+    return;
+  }
+  if(i>=mazo.length){
+    const esHoy=document.getElementById('fTanda').value==='hoy';
+    zona.innerHTML=`<div class="carta" style="text-align:center"><div class="pregunta">Tanda completada</div>
+      <p style="color:var(--gris)">${esHoy?'Repasos de hoy al día. Los intervalos siguen creciendo: vuelve mañana.':'Has pasado los '+mazo.length+' signos de esta tanda.'}</p>
+      <div class="acciones" style="justify-content:center">
+        <button class="btn" onclick="nuevaSesion()">Otra tanda</button>
+      </div></div>`;
+    return;
+  }
+  const s=mazo[i];
+  const modo=document.getElementById('fModo').value;
+  const e=SRS[s[0]];
+  const pregunta = modo==='directo' ? s[0] : s[3];
+  let h=`<div class="carta">
+    <div class="etq">${modo==='directo'?'¿Qué es y qué significa?':'¿Qué signo es?'}
+      <span class="chip">${esc(s[1])}</span><span class="chip">${esc(s[2])}</span>
+      ${!e?'<span class="chip">nuevo</span>':'<span class="chip'+(vencido(s)?' rep':'')+'">nivel '+e.n+(vencido(s)?' · vencido':'')+'</span>'}</div>
+    <div class="pregunta">${esc(pregunta)}</div>`;
+  if(!mostrado){
+    h+=`<div class="tapado">Piensa tu respuesta y pulsa mostrar.</div>
+      <div class="acciones"><button class="btn rev" onclick="mostrar()">Mostrar respuesta</button></div>`;
+  }else{
+    h+=`<div class="respuesta">
+      ${modo==='inverso'?`<div class="b">Signo</div><p><b>${esc(s[0])}</b></p>`:''}
+      ${modo==='directo'?`<div class="b">Qué se ve</div><p>${esc(s[3])}</p>`:''}
+      <div class="b">Qué significa</div><p>${esc(s[4])}</p>
+      <a href="https://radiopaedia.org/search?q=${encodeURIComponent(radioTerm(s[0]))}&scope=cases" target="_blank" rel="noopener"
+         style="font-size:12px;color:var(--ambar)">ver imágenes en Radiopaedia ↗</a></div>
+    <div class="acciones">
+      <button class="btn sec" style="border-color:var(--rojo);color:var(--rojo)" onclick="calificar('otra')" title="No lo sabía: vuelve al final de esta tanda y mañana">Otra vez (1) · ahora</button>
+      <button class="btn sec" style="border-color:var(--ambar);color:var(--ambar)" onclick="calificar('dificil')">Difícil (2) · ${etiquetaDias('dificil',s)}</button>
+      <button class="btn sec" onclick="calificar('bien')">Bien (3) · ${etiquetaDias('bien',s)}</button>
+      <button class="btn sec" style="border-color:var(--verde);color:var(--verde)" onclick="calificar('facil')">Fácil (4) · ${etiquetaDias('facil',s)}</button>
+    </div>`;
+  }
+  h+='</div>';
+  zona.innerHTML=h;
+  document.getElementById('btnPrev').disabled=(i===0);
+}
+function mostrar(){ mostrado=true; render(); }
+function calificar(g){
+  const s=mazo[i];
+  const e=SRS[s[0]];
+  const n=nivelTras(g, e?e.n:0);
+  SRS[s[0]]={n:n, p:Date.now()+ESCALA[n]*DIA, v:((e&&e.v)||0)+1};
+  persistir();
+  if(g==='otra') mazo.push(s);   // «Otra vez»: reaparece al final de ESTA tanda
+  ir(1);
+}
+function ir(d){
+  i=Math.max(0,i+d); mostrado=false; render();
+}
+function actualizarProgreso(){
+  const reg=document.getElementById('fReg').value;
+  const base=SIGNOS.filter(s=>!reg||s[1]===reg);
+  document.getElementById('pIdx').textContent=Math.min(i+1,mazo.length);
+  document.getElementById('pTot').textContent=mazo.length;
+  document.getElementById('pVenc').textContent=base.filter(vencido).length;
+  document.getElementById('pNuev').textContent=base.filter(esNuevo).length;
+  document.getElementById('pDom').textContent=base.filter(dominado).length+'/'+base.length;
+}
+// Copia de seguridad del progreso (en iPhone, Safari puede borrar los datos de
+// webs que no visitas en ~7 días: exporta de vez en cuando)
+function exportarSignos(){
+  const blob=new Blob([JSON.stringify(SRS)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='progreso_signos_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),0);
+}
+// --- Sync por código de texto: la forma cómoda de mover el progreso entre
+// móvil y ordenador (sin archivos). El código es el progreso completo en
+// base64 con prefijo de versión; al aplicar se FUSIONA: para cada signo gana
+// la entrada más repasada (más 'v'; a igualdad, la de repaso más lejano).
+const SYNC_PREFIJO='SRX1.';
+function codigoSync(){
+  return SYNC_PREFIJO+btoa(unescape(encodeURIComponent(JSON.stringify(SRS))));
+}
+function toggleSync(){
+  const p=document.getElementById('panelSync');
+  if(p.classList.toggle('oculto')) return;
+  document.getElementById('taSync').value=codigoSync();
+  document.getElementById('syncEstado').textContent='';
+}
+async function copiarSync(){
+  const ta=document.getElementById('taSync');
+  ta.value=codigoSync();   // regenerar por si calificaste después de abrir el panel
+  try{ await navigator.clipboard.writeText(ta.value); }
+  catch(e){ ta.select(); try{ document.execCommand('copy'); }catch(_){} }
+  document.getElementById('syncEstado').textContent='Copiado ✓ — pégalo en el otro dispositivo';
+}
+function aplicarSync(){
+  const est=document.getElementById('syncEstado');
+  const txt=(document.getElementById('taSync').value||'').trim();
+  try{
+    if(!txt.startsWith(SYNC_PREFIJO)) throw new Error('prefijo');
+    const d=JSON.parse(decodeURIComponent(escape(atob(txt.slice(SYNC_PREFIJO.length)))));
+    if(typeof d!=='object'||d===null||Array.isArray(d)) throw new Error('formato');
+    let cambiados=0;
+    for(const [k,e] of Object.entries(d)){
+      if(!e||typeof e.n!=='number') continue;
+      const mio=SRS[k];
+      // gana la entrada más avanzada: más repasos; a igualdad, próximo repaso más lejano
+      if(!mio || (e.v||0)>(mio.v||0) || ((e.v||0)===(mio.v||0) && (e.p||0)>(mio.p||0))){
+        SRS[k]=e; cambiados++;
+      }
+    }
+    persistir();
+    est.style.color='var(--verde)';
+    est.textContent='Aplicado ✓ — '+cambiados+' signo(s) actualizados';
+    nuevaSesion();
+    document.getElementById('panelSync').classList.remove('oculto');
+    document.getElementById('taSync').value=codigoSync();
+  }catch(err){
+    est.style.color='var(--rojo)';
+    est.textContent='Ese texto no es un código de sync válido (empieza por SRX1.)';
+  }
+}
+document.getElementById('impSignos').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(typeof d!=='object'||d===null||Array.isArray(d)) throw new Error('formato');
+      Object.assign(SRS,d); persistir(); nuevaSesion();
+    }catch(_){ alert('No es un progreso de signos válido.'); }
+    e.target.value='';
+  };
+  r.readAsText(f);
+});
+function verLista(){
+  enLista=!enLista;
+  const zl=document.getElementById('zonaLista');
+  if(!enLista){ zl.classList.add('oculto');
+    document.getElementById('zonaCarta').classList.remove('oculto');
+    document.getElementById('navBotones').classList.remove('oculto');
+    render(); return; }
+  const reg=document.getElementById('fReg').value;
+  const filas=SIGNOS.filter(s=>!reg||s[1]===reg)
+    .slice().sort((a,b)=>a[1].localeCompare(b[1])||a[0].localeCompare(b[0]));
+  let h='<table class="lista"><tr><th>Signo</th><th>Región</th><th>Qué se ve</th><th>Qué significa</th></tr>';
+  for(const s of filas){
+    const e=SRS[s[0]];
+    const est=!e?'':(vencido(s)?' <span class="rep">n'+e.n+' vencido</span>':' <span style="color:var(--gris)">n'+e.n+'</span>');
+    h+=`<tr><td>${esc(s[0])}${est}</td>
+      <td>${esc(s[1])} · ${esc(s[2])}</td><td>${esc(s[3])}</td><td>${esc(s[4])}</td></tr>`;
+  }
+  h+='</table>';
+  zl.innerHTML=h; zl.classList.remove('oculto');
+  document.getElementById('zonaCarta').classList.add('oculto');
+  document.getElementById('navBotones').classList.add('oculto');
+}
+
+// Filtro de regiones
+(function(){
+  const sel=document.getElementById('fReg');
+  for(const r of [...new Set(SIGNOS.map(s=>s[1]))]){
+    const o=document.createElement('option'); o.value=r; o.textContent=r; sel.appendChild(o);
+  }
+})();
+cargarFiltros();   // restaura región/modo/tanda de la visita anterior
+document.addEventListener('keydown',ev=>{
+  if(/^(input|select|textarea)$/i.test(ev.target.tagName)) return;
+  if(enLista) return;
+  if(ev.key===' '){ ev.preventDefault(); if(!mostrado && i<mazo.length) mostrar(); }
+  else if(ev.key==='ArrowRight') ir(1);
+  else if(ev.key==='ArrowLeft') ir(-1);
+  else if(mostrado && ev.key==='1') calificar('otra');
+  else if(mostrado && ev.key==='2') calificar('dificil');
+  else if(mostrado && ev.key==='3') calificar('bien');
+  else if(mostrado && ev.key==='4') calificar('facil');
+});
+nuevaSesion();
+</script>
+</body>
+</html>
