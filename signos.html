@@ -78,14 +78,15 @@
     <span><label>Tanda</label>
       <select id="fTanda" onchange="nuevaSesion()">
         <option value="hoy">repaso de hoy</option>
-        <option value="todos">todos</option>
+        <option value="todos">todos (sin límite)</option>
       </select></span>
+    <span><label>Límite/día</label><input type="number" id="fLimite" min="1" value="12" style="width:56px" onchange="guardarFiltros();nuevaSesion()" title="Cuántos signos por día en «repaso de hoy» (repasos vencidos + nuevos). Empieza poco a poco; súbelo cuando quieras."></span>
     <button class="btn sec peq" onclick="verLista()">Lista completa</button>
     <button class="btn sec peq" onclick="exportarSignos()" title="Descarga tu progreso (útil en iPhone, donde Safari puede borrar datos de webs poco visitadas)">⬇ copia</button>
     <button class="btn sec peq" onclick="document.getElementById('impSignos').click()">⬆ importar</button>
     <button class="btn sec peq" onclick="toggleSync()" title="Copia un código de texto en un dispositivo y pégalo en el otro: la forma fácil de llevar el progreso entre móvil y ordenador">Sync 📲</button>
     <input type="file" id="impSignos" accept=".json" class="oculto">
-    <span class="progreso">Signo <b id="pIdx">0</b>/<b id="pTot">0</b> · vencidos hoy <b id="pVenc">0</b> · nuevos <b id="pNuev">0</b> · dominados <b id="pDom">0</b></span>
+    <span class="progreso">Signo <b id="pIdx">0</b>/<b id="pTot">0</b> · hoy <b id="pHoy">0</b> · vencidos <b id="pVenc">0</b> · nuevos <b id="pNuev">0</b> · dominados <b id="pDom">0</b></span>
   </div>
 
   <div id="panelSync" class="oculto" style="background:var(--papel);border:1px solid var(--linea);border-radius:8px;padding:14px 16px;margin-bottom:18px;font-size:13px">
@@ -112,8 +113,10 @@
   <p class="aviso">
     <b>Repetición espaciada:</b> al calificar cada signo se programa su próximo repaso
     (intervalos de 1 → 3 → 7 → 16 → 35 → 70 días). «Otra vez» lo devuelve al final de la
-    tanda actual; «Fácil» salta un nivel. La tanda «repaso de hoy» trae solo los vencidos
-    y los nuevos. El progreso se guarda en este navegador; usa «⬇ copia» de vez en cuando
+    tanda actual; «Fácil» salta un nivel. La tanda «repaso de hoy» trae los vencidos y
+    algunos nuevos <b>hasta tu «Límite/día»</b> (por defecto 12): así lo aprendes poco a
+    poco en vez de todos de golpe. Sube el límite cuando quieras, o usa «todos» para repasar
+    sin tope. El progreso se guarda en este navegador; usa «⬇ copia» de vez en cuando
     (en iPhone, Safari puede borrar los datos de webs que no visitas en ~una semana).
     Descripciones orientativas de estudio: contrasta siempre con tus textos de referencia
     (Radiopaedia tiene entrada dedicada de casi todos, con imágenes de ejemplo).
@@ -378,13 +381,31 @@ let mazo=[], i=0, mostrado=false, enLista=false;
 function esc(s){ return (s==null?'':s.toString()).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function barajar(a){ for(let k=a.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
 
+// --- Límite diario: cuántos signos hacer al día en «repaso de hoy» ---
+// Cuenta las calificaciones de hoy (sin contar «Otra vez», que solo reencola)
+// para no soltar los ~127 de golpe: se aprende poco a poco.
+const DIA_KEY='signos_dia_v1';
+function claveDia(d){ d=d||new Date(); return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
+function hechosHoy(){
+  try{ const r=JSON.parse(localStorage.getItem(DIA_KEY)||'{}');
+    return r.d===claveDia()? (r.hechos||0) : 0; }catch(e){ return 0; }
+}
+function registrarHecho(){
+  try{ const hoy=claveDia(); let r=JSON.parse(localStorage.getItem(DIA_KEY)||'{}');
+    if(r.d!==hoy) r={d:hoy,hechos:0};
+    r.hechos=(r.hechos||0)+1; localStorage.setItem(DIA_KEY, JSON.stringify(r)); }catch(e){}
+}
+function limiteDiario(){ return Math.max(1, parseInt(document.getElementById('fLimite').value)||12); }
+function restanHoy(){ return Math.max(0, limiteDiario()-hechosHoy()); }
+
 // Recordar los filtros elegidos (región/modo/tanda) entre visitas
 const FILTROS_KEY='signos_filtros_v1';
 function guardarFiltros(){
   try{ localStorage.setItem(FILTROS_KEY, JSON.stringify({
     reg:document.getElementById('fReg').value,
     modo:document.getElementById('fModo').value,
-    tanda:document.getElementById('fTanda').value})); }catch(e){}
+    tanda:document.getElementById('fTanda').value,
+    limite:limiteDiario()})); }catch(e){}
 }
 function cargarFiltros(){
   try{ const f=JSON.parse(localStorage.getItem(FILTROS_KEY)||'{}');
@@ -393,6 +414,7 @@ function cargarFiltros(){
       document.getElementById('fReg').value=f.reg;
     if(f.modo) document.getElementById('fModo').value=f.modo;
     if(f.tanda) document.getElementById('fTanda').value=f.tanda;
+    if(f.limite) document.getElementById('fLimite').value=f.limite;
   }catch(e){}
 }
 function nuevaSesion(){
@@ -400,8 +422,12 @@ function nuevaSesion(){
   const reg=document.getElementById('fReg').value;
   const tanda=document.getElementById('fTanda').value;
   const base=SIGNOS.filter(s=>!reg||s[1]===reg);
-  if(tanda==='hoy') mazo=barajar(base.filter(vencido)).concat(barajar(base.filter(esNuevo)));
-  else mazo=barajar(base.slice());
+  if(tanda==='hoy'){
+    // repasos vencidos primero, luego nuevos, recortado al cupo que queda hoy
+    const cola=barajar(base.filter(vencido)).concat(barajar(base.filter(esNuevo)));
+    mazo=cola.slice(0, restanHoy());
+  }
+  else mazo=barajar(base.slice());   // «todos» = sin límite (repaso/atracón)
   i=0; mostrado=false; enLista=false;
   document.getElementById('zonaLista').classList.add('oculto');
   document.getElementById('zonaCarta').classList.remove('oculto');
@@ -413,17 +439,20 @@ function render(){
   actualizarProgreso();
   if(!mazo.length){
     const esHoy=document.getElementById('fTanda').value==='hoy';
-    zona.innerHTML='<div class="tapado">'+(esHoy
-      ?'Sin repasos vencidos ni signos nuevos hoy con estos filtros. ¡Al día! Vuelve mañana o cambia la tanda a «todos».'
-      :'No hay signos con estos filtros.')+'</div>';
+    let msg;
+    if(!esHoy) msg='No hay signos con estos filtros.';
+    else if(restanHoy()<=0) msg='¡Límite de hoy cumplido ('+limiteDiario()+')! 🎯 Vuelve mañana, sube el límite/día, o pon la tanda en «todos» para seguir sin tope.';
+    else msg='Sin repasos vencidos ni signos nuevos con estos filtros. ¡Al día! Vuelve mañana o cambia la tanda a «todos».';
+    zona.innerHTML='<div class="tapado">'+msg+'</div>';
     return;
   }
   if(i>=mazo.length){
     const esHoy=document.getElementById('fTanda').value==='hoy';
-    zona.innerHTML=`<div class="carta" style="text-align:center"><div class="pregunta">Tanda completada</div>
-      <p style="color:var(--gris)">${esHoy?'Repasos de hoy al día. Los intervalos siguen creciendo: vuelve mañana.':'Has pasado los '+mazo.length+' signos de esta tanda.'}</p>
+    const sinCupo=esHoy && restanHoy()<=0;
+    zona.innerHTML=`<div class="carta" style="text-align:center"><div class="pregunta">${esHoy?'¡Cupo de hoy hecho! 🎯':'Tanda completada'}</div>
+      <p style="color:var(--gris)">${esHoy?'Has hecho tus '+limiteDiario()+' signos de hoy. Los intervalos siguen creciendo: vuelve mañana.':'Has pasado los '+mazo.length+' signos de esta tanda.'}</p>
       <div class="acciones" style="justify-content:center">
-        <button class="btn" onclick="nuevaSesion()">Otra tanda</button>
+        ${sinCupo?'':'<button class="btn" onclick="nuevaSesion()">'+(esHoy?'Seguir':'Otra tanda')+'</button>'}
       </div></div>`;
     return;
   }
@@ -465,6 +494,7 @@ function calificar(g){
   SRS[s[0]]={n:n, p:Date.now()+ESCALA[n]*DIA, v:((e&&e.v)||0)+1};
   persistir();
   if(g==='otra') mazo.push(s);   // «Otra vez»: reaparece al final de ESTA tanda
+  else registrarHecho();         // cuenta para el cupo del día (no cuenta «Otra vez»)
   ir(1);
 }
 function ir(d){
@@ -475,6 +505,7 @@ function actualizarProgreso(){
   const base=SIGNOS.filter(s=>!reg||s[1]===reg);
   document.getElementById('pIdx').textContent=Math.min(i+1,mazo.length);
   document.getElementById('pTot').textContent=mazo.length;
+  document.getElementById('pHoy').textContent=hechosHoy()+'/'+limiteDiario();
   document.getElementById('pVenc').textContent=base.filter(vencido).length;
   document.getElementById('pNuev').textContent=base.filter(esNuevo).length;
   document.getElementById('pDom').textContent=base.filter(dominado).length+'/'+base.length;
