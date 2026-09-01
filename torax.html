@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tórax">
+<title>Semiología torácica — TC y RX</title>
+<style>
+  :root{
+    --tinta:#1a2238; --hueso:#f3f1ea; --papel:#fbfaf6; --ambar:#c4602a;
+    --verde:#2f6b4f; --rojo:#a33a3a; --gris:#7a7a72; --linea:#d9d5c8; --tapado:#e7e3d6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    background:var(--hueso);color:var(--tinta);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  header{border-bottom:1.5px solid var(--tinta);padding:18px 22px;
+    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  header h1{font-size:21px;font-weight:600}
+  header .sub{font-size:12px;color:var(--gris);letter-spacing:.04em;text-transform:uppercase}
+  header a{color:var(--ambar)}
+  .wrap{max-width:900px;margin:0 auto;padding:20px}
+
+  .nav{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--linea);padding-bottom:12px;margin-bottom:20px}
+  .nav button{font-family:inherit;font-size:14px;padding:7px 13px;border-radius:20px;cursor:pointer;
+    border:1.5px solid var(--linea);background:transparent;color:var(--tinta);transition:.12s}
+  .nav button:hover{border-color:var(--ambar)}
+  .nav button.on{background:var(--tinta);border-color:var(--tinta);color:var(--hueso)}
+
+  h2.sec{font-size:19px;margin-bottom:3px}
+  p.lead{font-size:14px;color:var(--gris);margin-bottom:18px;font-style:italic}
+  h3{font-size:15px;margin:22px 0 7px;padding-bottom:3px;border-bottom:1px solid var(--linea)}
+
+  .tarj{background:var(--papel);border:1px solid var(--linea);border-left:3px solid var(--ambar);
+    border-radius:9px;padding:15px 17px;margin-bottom:12px}
+  .tarj h4{font-size:16px;margin-bottom:6px}
+  .tarj .campo{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--gris);margin-top:9px}
+  .tarj p{font-size:14px;margin-top:1px}
+  .tarj .truco{background:#f5efe6;border-radius:6px;padding:8px 11px;margin-top:10px;font-size:13.5px}
+  .tarj .truco b{color:var(--ambar)}
+  .tarj a.rp{font-size:12px;color:var(--ambar);display:inline-block;margin-top:9px}
+
+  /* El contexto manda */
+  .ctx{background:var(--papel);border:1px solid var(--linea);border-radius:9px;padding:0;margin-bottom:16px;overflow:hidden}
+  .ctx .cab{background:#efece2;padding:11px 16px;border-bottom:1px solid var(--linea)}
+  .ctx .cab h4{font-size:16px}
+  .ctx .cab span{font-size:12.5px;color:var(--gris)}
+  .ctx table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .ctx td{padding:8px 16px;border-bottom:1px solid var(--linea);vertical-align:top}
+  .ctx tr:last-child td{border-bottom:none}
+  .ctx td.h{width:44%;color:var(--tinta)}
+  .ctx td.d{font-weight:600;width:30%}
+  .ctx td.p{color:var(--gris);font-size:12.5px;font-style:italic}
+
+  table.t{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0 16px;background:var(--papel)}
+  table.t th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris);
+    text-align:left;padding:7px 10px;border-bottom:1.5px solid var(--tinta)}
+  table.t td{padding:7px 10px;border-bottom:1px solid var(--linea);vertical-align:top}
+  table.t td:first-child{font-weight:600;white-space:nowrap}
+
+  ul.chk{list-style:none;margin:6px 0 16px}
+  ul.chk li{font-size:14px;padding:5px 0 5px 26px;position:relative;border-bottom:1px solid var(--linea)}
+  ul.chk li:before{content:"☐";position:absolute;left:4px;color:var(--ambar)}
+  ul.chk li b{color:var(--tinta)}
+  .ciegas{background:#f7ebe4;border-left:3px solid var(--rojo);border-radius:8px;padding:12px 15px;margin:10px 0 18px}
+  .ciegas h4{font-size:14px;margin-bottom:5px;color:var(--rojo)}
+  .ciegas p{font-size:13.5px}
+
+  /* Quiz */
+  .barra{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px;margin-bottom:16px}
+  .barra label{color:var(--gris);margin-right:3px}
+  select,input[type=number]{font-family:inherit;font-size:13px;border:1px solid var(--linea);
+    border-radius:5px;padding:5px 8px;background:var(--papel);color:var(--tinta)}
+  .prog{margin-left:auto;font-size:12px;color:var(--gris)}
+  .prog b{color:var(--tinta)}
+  .carta{background:var(--papel);border:1px solid var(--linea);border-radius:10px;padding:24px;min-height:230px}
+  .etq{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);margin-bottom:10px}
+  .etq .chip{display:inline-block;border:1px solid var(--linea);border-radius:20px;padding:1px 10px;
+    margin-left:6px;text-transform:none;letter-spacing:0}
+  .preg{font-size:19px;font-weight:600;margin-bottom:8px}
+  .hist{font-size:15.5px;color:var(--tinta);background:#f0ece2;border-radius:7px;padding:11px 14px;margin-bottom:14px}
+  .resp{border-top:1px dashed var(--linea);padding-top:14px}
+  .resp .b{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--gris)}
+  .resp p{font-size:15px;margin:2px 0 12px}
+  .tapado{background:var(--tapado);border:1px dashed #c3bda9;border-radius:8px;padding:20px;
+    text-align:center;color:#8a8470;font-size:14px}
+  .acciones{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap;align-items:center}
+  .btn{font-family:inherit;font-size:14px;border:1.5px solid var(--tinta);background:var(--tinta);
+    color:var(--hueso);padding:9px 18px;border-radius:6px;cursor:pointer;transition:.15s}
+  .btn:hover{background:transparent;color:var(--tinta)}
+  .btn.sec{background:transparent;color:var(--tinta)}
+  .btn.sec:hover{background:var(--tinta);color:var(--hueso)}
+  .btn.rev{border-color:var(--ambar);background:var(--ambar);color:#fff}
+  .btn.rev:hover{background:#a64e1f}
+  .btn.peq{font-size:12px;padding:5px 11px}
+  .marca{font-size:12.5px;color:var(--gris)}
+  .atajos{text-align:center;font-size:11px;color:var(--gris);margin-top:12px}
+  .atajos b{color:var(--tinta)}
+
+  .aviso{font-size:12px;color:var(--gris);border-top:1px solid var(--linea);
+    padding-top:13px;margin-top:26px;line-height:1.6}
+  .oculto{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Semiología torácica</h1></div>
+  <div class="sub"><a href="index.html">‹ inicio</a> · el patrón · la distribución · <b>el contexto</b></div>
+</header>
+
+<div class="wrap">
+  <nav class="nav" id="nav"></nav>
+  <div id="cont"></div>
+
+  <p class="aviso">
+    <b>Material orientativo de estudio propio</b>, redactado para tu rotación de tórax: resume patrones y
+    diferenciales de forma necesariamente simplificada. Contrasta siempre con Fleischner/tus textos y con el
+    criterio de tu adjunto — un patrón nunca diagnostica solo, y las excepciones existen. Sin datos de pacientes.
+  </p>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// 1 · PATRONES (TC)  [nombre, qué es, dónde/distribución, diferencial, truco, términoEN]
+// ═══════════════════════════════════════════════════════════════════════════
+const PATRONES=[
+['Vidrio deslustrado (GGO)',
+ 'Aumento de atenuación que NO borra vasos ni paredes bronquiales (se siguen viendo a través).',
+ 'Puede ser difuso, parcheado, geográfico o centrolobulillar. Fíjate si respeta o no el subpleural.',
+ 'Edema, infección (PCP, viral), hemorragia alveolar, NSIP, neumonitis por hipersensibilidad, adenocarcinoma lepídico, toxicidad por fármacos.',
+ 'Si BORRA los vasos ya no es vidrio: es consolidación. Es el primer corte diagnóstico y el que más se falla.',
+ 'ground glass opacity'],
+['Consolidación',
+ 'Aumento de atenuación que SÍ borra vasos y bronquios; suele llevar broncograma aéreo.',
+ 'Lobar, segmentaria, parcheada o periférica. La cronología manda tanto como la forma.',
+ 'Neumonía, edema, hemorragia, neumonía organizada, neumonía eosinófila, adenocarcinoma lepídico, linfoma.',
+ 'Consolidación que NO se resuelve en semanas: deja de pensar en infección y piensa en organizada, eosinófila o tumor.',
+ 'consolidation'],
+['Empedrado (crazy paving)',
+ 'Vidrio deslustrado con engrosamiento de septos inter e intralobulillares superpuesto.',
+ 'Suele ser geográfico, con límites netos entre lo afectado y lo sano.',
+ 'Proteinosis alveolar (el clásico), PCP, edema, daño alveolar difuso/COVID, hemorragia, lepídico.',
+ 'Es un patrón muy llamativo pero POCO específico: el contexto clínico es el que decide.',
+ 'crazy paving'],
+['Nódulos centrolobulillares',
+ 'Nódulos en el centro del lobulillo secundario, a unos 5-10 mm de pleura y cisuras.',
+ 'RESPETAN la pleura y las cisuras (nunca las tocan). Ese detalle es el diagnóstico de la distribución.',
+ 'Bronquiolitis infecciosa (con árbol en brote), neumonitis por hipersensibilidad (mal definidos, en vidrio), bronquiolitis del fumador.',
+ 'Primero decide la DISTRIBUCIÓN del nódulo (centrolobulillar / perilinfático / aleatorio) y el diferencial se reduce solo.',
+ 'centrilobular nodules'],
+['Nódulos perilinfáticos',
+ 'Nódulos siguiendo los linfáticos: pleura, cisuras, septos interlobulillares y haces broncovasculares.',
+ 'TOCAN pleura y cisuras (al revés que los centrolobulillares). Predominio perihiliar y superior en sarcoidosis.',
+ 'Sarcoidosis, linfangitis carcinomatosa, silicosis/neumoconiosis del carbón.',
+ 'Nódulos que se pegan a la cisura = perilinfáticos. Si además hay adenopatías hiliares simétricas, piensa sarcoidosis.',
+ 'perilymphatic nodules'],
+['Nódulos aleatorios (miliares)',
+ 'Nódulos distribuidos al azar, sin respetar ninguna estructura, incluidos los subpleurales.',
+ 'Uniformes y difusos por ambos campos cuando son miliares.',
+ 'Diseminación hematógena: TBC miliar, hongos, metástasis (tiroides, melanoma, riñón, mama).',
+ 'Aleatorio = vía hematógena. Ante un miliar, la pregunta es infección vs metástasis, y la responde la clínica.',
+ 'random nodules miliary'],
+['Árbol en brote',
+ 'Nodulillos centrolobulillares unidos a opacidades lineales ramificadas: bronquiolos rellenos.',
+ 'Parcheado, a menudo unilateral o segmentario; en TBC clásicamente en segmentos apicoposteriores.',
+ 'Infección de vía aérea pequeña: TBC endobronquial, micobacterias atípicas (MAI), bacteriana; también aspiración.',
+ 'Casi siempre significa infección/aspiración: es de los patrones más específicos que hay.',
+ 'tree-in-bud'],
+['Patrón reticular',
+ 'Líneas entrecruzadas por engrosamiento del intersticio.',
+ 'Valora si es basal y subpleural (fibrosis tipo UIP) o difuso con derrame (edema/linfangitis).',
+ 'Fibrosis pulmonar, edema intersticial, linfangitis carcinomatosa, NSIP.',
+ 'Reticular + bronquiectasias de tracción + pérdida de volumen = fibrosis establecida, no proceso agudo.',
+ 'reticular pattern'],
+['Panalización (honeycombing)',
+ 'Quistes aéreos agrupados, de pared gruesa, apilados en capas subpleurales.',
+ 'Basal y subpleural. Es el hallazgo clave del patrón UIP.',
+ 'FPI/UIP, fibrosis de conectivopatía, asbestosis, HP fibrótica avanzada.',
+ 'Si dudas entre panal y enfisema paraseptal: el panal se APILA en varias capas; el paraseptal es una sola fila.',
+ 'honeycombing'],
+['Quistes pulmonares',
+ 'Espacios aéreos con pared fina definida, dentro del parénquima.',
+ 'La distribución y la forma separan las entidades mejor que el número.',
+ 'LAM (redondos, difusos, mujer joven), histiocitosis de Langerhans (irregulares, superiores, con nódulos, fumador), LIP (perivasculares, Sjögren).',
+ 'Quistes difusos en mujer joven con neumotórax de repetición → piensa en LAM (busca angiomiolipomas renales).',
+ 'cystic lung disease'],
+['Atenuación en mosaico',
+ 'Áreas de distinta densidad pulmonar en tablero de ajedrez.',
+ 'La clave la da el TC en ESPIRACIÓN.',
+ 'Tres causas: vía aérea pequeña (atrapamiento aéreo), vascular (TEP crónico/HTP) e infiltrativa (vidrio).',
+ 'Si en espiración las zonas oscuras NO se densifican, es atrapamiento aéreo → enfermedad de pequeña vía aérea.',
+ 'mosaic attenuation'],
+['Enfisema',
+ 'Destrucción de espacios aéreos distales al bronquiolo terminal, sin pared propia definida.',
+ 'Su distribución identifica el tipo y la causa.',
+ 'Centrolobulillar (superior, tabaco), paraseptal (subpleural, neumotórax del joven), panlobulillar (inferior, déficit de alfa-1-antitripsina).',
+ 'Enfisema de predominio en BASES en un paciente joven: pide alfa-1-antitripsina.',
+ 'emphysema'],
+['Engrosamiento septal',
+ 'Septos interlobulillares visibles y engrosados (dibujan el lobulillo secundario).',
+ 'Liso, nodular o irregular: la textura orienta el diagnóstico.',
+ 'Liso → edema; nodular → linfangitis carcinomatosa o sarcoidosis; irregular → fibrosis.',
+ 'Septal liso + derrame + cardiomegalia = edema. Nodular sin cardiomegalia y con primario conocido = linfangitis.',
+ 'interlobular septal thickening'],
+['Bronquiectasias de tracción',
+ 'Bronquios dilatados e irregulares arrastrados por la fibrosis que los rodea.',
+ 'Dentro de zonas reticulares o de vidrio fibrótico.',
+ 'Marcador de fibrosis irreversible (UIP, NSIP fibrótica, HP fibrótica, post-SDRA).',
+ 'Distinguen fibrosis (irreversible) de inflamación potencialmente reversible: cámbialo en tu informe.',
+ 'traction bronchiectasis'],
+['Cavitación',
+ 'Espacio aéreo dentro de una consolidación, masa o nódulo, con pared propia.',
+ 'El grosor y la regularidad de la pared, y el número de lesiones, orientan.',
+ 'Absceso, TBC, carcinoma escamoso, granulomatosis con poliangeítis, émbolos sépticos, hongos.',
+ 'Pared gruesa e irregular en fumador = cáncer hasta demostrar lo contrario. Múltiples y periféricas = émbolos sépticos.',
+ 'cavitation lung'],
+['Patrón fibrótico: UIP vs NSIP',
+ 'Dos patrones de fibrosis que se distinguen por distribución y por la presencia de panal.',
+ 'UIP: basal, subpleural, con panal. NSIP: basal, con vidrio y RESPETO subpleural característico.',
+ 'UIP → FPI (o conectivopatía, asbestosis). NSIP → conectivopatías, fármacos, idiopática.',
+ 'El respeto subpleural (una banda sana pegada a la pleura) apunta fuerte a NSIP y aleja de FPI.',
+ 'usual interstitial pneumonia NSIP'],
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 2 · EL CONTEXTO MANDA — mismo patrón, distinta historia, distinto diagnóstico
+// ═══════════════════════════════════════════════════════════════════════════
+const CONTEXTOS=[
+{patron:'Vidrio deslustrado difuso bilateral', nota:'El patrón no cambia; la historia lo decide todo.', esc:[
+  {h:'VIH con CD4 bajos, disnea subaguda, LDH alta', dx:'Neumonía por Pneumocystis', p:'Respeta la periferia, puede quistificar; sin derrame'},
+  {h:'Cardiópata, disnea aguda, ortopnea', dx:'Edema pulmonar', p:'Septos lisos, derrame, cardiomegalia, distribución perihiliar'},
+  {h:'Hemoptisis y caída del hematocrito', dx:'Hemorragia alveolar difusa', p:'Sin derrame; a los días aparece crazy paving que se aclara rápido'},
+  {h:'Criador de palomas / humedades en casa', dx:'Neumonitis por hipersensibilidad', p:'Nódulos centrolobulillares mal definidos y atrapamiento aéreo en espiración'},
+  {h:'Quimioterapia reciente (bleomicina, amiodarona…)', dx:'Toxicidad pulmonar por fármaco', p:'Temporalidad con el fármaco; amiodarona da densidad alta en hígado/pulmón'},
+]},
+{patron:'Empedrado (crazy paving)', nota:'Muy vistoso, poco específico: no lo informes como diagnóstico.', esc:[
+  {h:'Clínica larvada de meses, poca repercusión clínica', dx:'Proteinosis alveolar', p:'Geográfico con límites muy netos; discordancia clínica-radiológica'},
+  {h:'Inmunodeprimido, disnea progresiva', dx:'Neumonía por Pneumocystis', p:'Predominio perihiliar, respeta periferia'},
+  {h:'Insuficiencia cardiaca descompensada', dx:'Edema pulmonar', p:'Derrame + cardiomegalia; cambia rápido con diuréticos'},
+  {h:'Cuadro respiratorio agudo grave, SDRA', dx:'Daño alveolar difuso', p:'Gradiente anteroposterior, evoluciona a fibrosis'},
+]},
+{patron:'Consolidación', nota:'La cronología es tan diagnóstica como la imagen.', esc:[
+  {h:'Fiebre, tos y leucocitosis de 3 días', dx:'Neumonía aguda', p:'Lobar o segmentaria, con broncograma; debe resolverse'},
+  {h:'Semanas de evolución, migratoria, mejora con corticoides', dx:'Neumonía organizada', p:'Periférica o peribroncovascular; puede dar halo invertido'},
+  {h:'Asma y eosinofilia periférica', dx:'Neumonía eosinófila crónica', p:'Periférica «en negativo del edema» (edema fotográfico invertido)'},
+  {h:'Meses sin resolverse pese a antibióticos', dx:'Adenocarcinoma lepídico o linfoma', p:'Broncograma en consolidación crónica que no cambia; busca nódulos satélite'},
+  {h:'Paciente encamado, base derecha, mal estado dental', dx:'Neumonía aspirativa', p:'Segmentos declives (posteriores de LS, superiores de LI)'},
+]},
+{patron:'Nódulos miliares', nota:'Aleatorios = vía hematógena. La pregunta es infección o tumor.', esc:[
+  {h:'Contacto con TBC, fiebre, síndrome constitucional', dx:'Tuberculosis miliar', p:'Nódulos uniformes de 1-3 mm; busca adenopatías necróticas'},
+  {h:'Cáncer de tiroides, melanoma o renal conocido', dx:'Metástasis hematógenas', p:'Tamaños algo más variables, predominio en bases (más flujo)'},
+  {h:'Inmunodeprimido con hongos endémicos', dx:'Diseminación fúngica', p:'Contexto epidemiológico y de inmunosupresión'},
+]},
+{patron:'Nódulo/masa con signo del halo', nota:'El halo es hemorragia perilesional: la causa la da el paciente.', esc:[
+  {h:'Neutropénico febril tras quimioterapia', dx:'Aspergilosis angioinvasiva', p:'Evoluciona a semiluna aérea al recuperar neutrófilos'},
+  {h:'Tumor primario muy vascular (renal, coriocarcinoma)', dx:'Metástasis hemorrágicas', p:'Múltiples, de predominio basal'},
+  {h:'Cuadro subagudo, consolidaciones cambiantes', dx:'Neumonía organizada (halo invertido)', p:'El halo invertido es más típico de la organizada'},
+]},
+{patron:'Lesión cavitada', nota:'Pared, número y localización orientan más que la cavidad en sí.', esc:[
+  {h:'Fumador de 65 años, masa única de pared gruesa e irregular', dx:'Carcinoma escamoso', p:'Pared >15 mm e irregular = maligno hasta demostrar lo contrario'},
+  {h:'Cavidad apical con árbol en brote alrededor', dx:'Tuberculosis de reactivación', p:'Segmentos apicoposteriores de LS y superior de LI'},
+  {h:'ADVP o portador de catéter, múltiples nódulos periféricos cavitados', dx:'Émbolos sépticos', p:'Periféricos, con vaso nutricio, en distinto estadio evolutivo'},
+  {h:'Sinusitis crónica, hematuria y ANCA positivos', dx:'Granulomatosis con poliangeítis', p:'Nódulos múltiples cavitados que cambian en el tiempo'},
+]},
+{patron:'Adenopatías hiliares bilaterales', nota:'Simetría + clínica separan lo benigno de lo agresivo.', esc:[
+  {h:'Joven asintomático o con eritema nodoso', dx:'Sarcoidosis', p:'Simétricas, hiliares y mediastínicas; nódulos perilinfáticos asociados'},
+  {h:'Síndrome B, masa mediastínica voluminosa', dx:'Linfoma', p:'Asimétricas y confluentes, engloban estructuras'},
+  {h:'Minero o cantero, con calcificación periférica', dx:'Silicosis', p:'Adenopatías en cáscara de huevo + nódulos superiores'},
+]},
+{patron:'Fibrosis pulmonar', nota:'Distribución + panal + exposición definen el subtipo.', esc:[
+  {h:'Varón mayor, basal y subpleural, con panal', dx:'Patrón UIP (FPI)', p:'Sin vidrio significativo; panal apilado subpleural'},
+  {h:'Vidrio con respeto subpleural, mujer con conectivopatía', dx:'Patrón NSIP', p:'La banda subpleural sana es la clave'},
+  {h:'Exposición a aves/humedad, mosaico y predominio medio-superior', dx:'Neumonitis por hipersensibilidad fibrótica', p:'Tres densidades (normal, vidrio, atrapamiento) en el mismo corte'},
+  {h:'Placas pleurales calcificadas y trabajo con amianto', dx:'Asbestosis', p:'Fibrosis basal + placas pleurales: la pleura da el diagnóstico'},
+]},
+{patron:'Derrame pleural', nota:'Mira SIEMPRE la pleura, no solo el líquido.', esc:[
+  {h:'Fiebre y consolidación adyacente', dx:'Derrame paraneumónico / empiema', p:'Signo del split pleura: ambas hojas realzan y engrosadas'},
+  {h:'Engrosamiento pleural nodular circunferencial, antecedente de amianto', dx:'Mesotelioma', p:'Engrosamiento >1 cm, circunferencial, afecta cisura y retrae el hemitórax'},
+  {h:'Derrame masivo SIN desviación del mediastino al lado sano', dx:'Sospecha de obstrucción bronquial o pulmón atrapado', p:'El mediastino fijo o atraído es un signo de alarma'},
+]},
+{patron:'Neumotórax', nota:'El «por qué» cambia el manejo y el seguimiento.', esc:[
+  {h:'Varón joven, alto y delgado, fumador', dx:'Neumotórax espontáneo primario', p:'Bullas apicales / enfisema paraseptal'},
+  {h:'Mujer joven con neumotórax de repetición', dx:'LAM (busca quistes difusos)', p:'Quistes redondos de pared fina, difusos; angiomiolipomas renales'},
+  {h:'EPOC conocido, deterioro brusco', dx:'Neumotórax espontáneo secundario', p:'Peor tolerado; a menudo requiere drenaje'},
+]},
+{patron:'Engrosamiento septal', nota:'La textura del septo es el dato discriminante.', esc:[
+  {h:'Disnea aguda, cardiomegalia y derrame bilateral', dx:'Edema intersticial', p:'Septos LISOS, distribución en alas de mariposa, cambia rápido'},
+  {h:'Neoplasia conocida, disnea progresiva sin fallo cardiaco', dx:'Linfangitis carcinomatosa', p:'Septos NODULARES/arrosariados, a menudo asimétricos'},
+]},
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3 · DISTRIBUCIÓN
+// ═══════════════════════════════════════════════════════════════════════════
+const DISTRIBUCION=[
+ {t:'Por distribución del nódulo (el árbol de decisión más rentable)',
+  cols:['Distribución','Cómo la reconoces','Piensa en'],
+  filas:[
+   ['Perilinfática','Toca pleura, cisuras y septos; perihiliar','Sarcoidosis · linfangitis · silicosis'],
+   ['Centrolobulillar','Respeta pleura y cisuras (5-10 mm de distancia)','Bronquiolitis infecciosa · neumonitis HP · bronquiolitis del fumador'],
+   ['Aleatoria','Al azar, incluidos los subpleurales','TBC miliar · metástasis hematógenas · hongos'],
+  ]},
+ {t:'Por zona pulmonar',
+  cols:['Predominio','Enfermedades típicas','Pista extra'],
+  filas:[
+   ['Lóbulos superiores','Sarcoidosis · silicosis · TBC de reactivación · histiocitosis · fibrosis quística','Suelen ser procesos «secos» o granulomatosos'],
+   ['Lóbulos inferiores','FPI/UIP · asbestosis · aspiración · bronquiectasias postinfecciosas · conectivopatías','Gravedad y flujo mandan aquí'],
+   ['Periférico / subpleural','UIP · NSIP · neumonía organizada · infarto pulmonar','La eosinófila crónica es periférica «invertida»'],
+   ['Central / peribroncovascular','Sarcoidosis · edema · linfoma · Kaposi','Sigue el haz broncovascular'],
+  ]},
+ {t:'Distribución de la TBC (clásico de guardia)',
+  cols:['Forma','Dónde','Hallazgos'],
+  filas:[
+   ['Primaria','Cualquier lóbulo (más los inferiores)','Consolidación + adenopatías; derrame'],
+   ['Reactivación','Apicoposterior de LS y superior de LI','Cavitación + árbol en brote (actividad)'],
+   ['Miliar','Difusa y uniforme','Nódulos aleatorios de 1-3 mm'],
+  ]},
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 4 · RX DE TÓRAX: LOCALIZAR
+// ═══════════════════════════════════════════════════════════════════════════
+const SILUETA=[
+ ['Borde cardiaco derecho','Lóbulo medio'],
+ ['Borde cardiaco izquierdo','Língula'],
+ ['Hemidiafragma','Lóbulo inferior (del lado que se borra)'],
+ ['Botón aórtico','Segmento apicoposterior del LSI'],
+ ['Aorta descendente','Lóbulo inferior izquierdo'],
+ ['Arco superior mediastínico derecho','Segmento apical del LSD / mediastino anterior'],
+];
+const COLAPSOS=[
+ ['LSD','Cisura menor asciende; si hay masa central, S de Golden'],
+ ['LM','Borra el borde cardiaco derecho; en lateral, banda triangular anterior'],
+ ['LID','Triángulo retrocardiaco derecho; borra el hemidiafragma'],
+ ['LSI','Velo difuso del hemitórax izquierdo; semiluna hiperclara (Luftsichel)'],
+ ['LII','Triángulo retrocardiaco izquierdo; borra la aorta descendente'],
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 5 · SISTEMÁTICA
+// ═══════════════════════════════════════════════════════════════════════════
+const SIST_RX=[
+ '<b>Calidad</b>: inspiración (6 arcos anteriores), rotación (clavículas simétricas), penetración',
+ '<b>Dispositivos</b>: TET, vías centrales, SNG, marcapasos, drenajes — extremo y posición',
+ '<b>Vía aérea</b>: tráquea centrada, carina, bronquios principales',
+ '<b>Pulmones</b>: compara zona por zona, derecha con izquierda, arriba con abajo',
+ '<b>Pleura</b>: senos costofrénicos, línea pleural apical (neumotórax), engrosamientos',
+ '<b>Corazón y mediastino</b>: tamaño, contornos, líneas paratraqueal y azigoesofágica, ventana aortopulmonar',
+ '<b>Diafragma y abdomen</b>: aire libre subdiafragmático, cámara gástrica, hernias',
+ '<b>Huesos y partes blandas</b>: costillas, clavículas, hombros, enfisema subcutáneo, mamas',
+ '<b>Segunda pasada</b>: vuelve a las zonas ciegas tras encontrar el primer hallazgo',
+];
+const SIST_TC=[
+ '<b>Ventana pulmonar</b>: define patrón (vidrio/consolidación/nódulos/reticular/quistes) y su distribución',
+ '<b>Espiración</b> si sospechas atrapamiento aéreo o mosaico',
+ '<b>Vía aérea</b>: recorre tráquea y bronquios hasta segmentarios; busca lesión endobronquial',
+ '<b>Mediastino</b>: adenopatías por estaciones (eje corto >10 mm), timo, esófago, tiroides',
+ '<b>Vasos</b>: arterias pulmonares (TEP, calibre >29 mm), aorta, cavidades cardiacas, pericardio',
+ '<b>Pleura y pared</b>: derrame, engrosamiento, placas, costillas y esternón',
+ '<b>Cortes abdominales</b>: hígado, suprarrenales (¡metástasis!), bazo, riñones incluidos',
+ '<b>Comparación</b>: SIEMPRE con estudios previos — el cambio en el tiempo es el mejor dato',
+];
+const ZONAS_CIEGAS='Ápices · retrocardiaco · detrás de los diafragmas · senos costofrénicos posteriores · hilios · partes blandas y hombros · la periferia de la propia placa.';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Navegación
+// ═══════════════════════════════════════════════════════════════════════════
+const SECCIONES=[
+ ['patrones','📊 Patrones (TC)'],
+ ['contexto','🔀 El contexto manda'],
+ ['distribucion','📍 Distribución'],
+ ['rx','🩻 RX: localizar'],
+ ['sistematica','✅ Sistemática'],
+ ['quiz','🎯 Quiz'],
+];
+let seccion='patrones';
+function esc(s){ return (s==null?'':s.toString()).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function renderNav(){
+  document.getElementById('nav').innerHTML=SECCIONES.map(([id,txt])=>
+    `<button class="${seccion===id?'on':''}" onclick="ir('${id}')">${txt}</button>`).join('');
+}
+function ir(id){ seccion=id; renderNav(); render(); localStorage.setItem('torax_seccion',id); }
+
+function render(){
+  const c=document.getElementById('cont');
+  if(seccion==='patrones') c.innerHTML=vistaPatrones();
+  else if(seccion==='contexto') c.innerHTML=vistaContexto();
+  else if(seccion==='distribucion') c.innerHTML=vistaDistribucion();
+  else if(seccion==='rx') c.innerHTML=vistaRX();
+  else if(seccion==='sistematica') c.innerHTML=vistaSistematica();
+  else if(seccion==='quiz'){ c.innerHTML=vistaQuizShell(); nuevaTanda(); }
+}
+function vistaPatrones(){
+  let h='<h2 class="sec">Patrones de TC de tórax</h2><p class="lead">Nombra el patrón, define su distribución y solo entonces construye el diferencial. Ese orden evita el 90% de los errores.</p>';
+  for(const p of PATRONES){
+    h+=`<div class="tarj"><h4>${esc(p[0])}</h4>
+      <div class="campo">Qué es</div><p>${esc(p[1])}</p>
+      <div class="campo">Dónde mirar / distribución</div><p>${esc(p[2])}</p>
+      <div class="campo">Diferencial</div><p>${esc(p[3])}</p>
+      <div class="truco"><b>Truco:</b> ${esc(p[4])}</div>
+      <a class="rp" target="_blank" rel="noopener" href="https://radiopaedia.org/search?q=${encodeURIComponent(p[5])}&scope=all">ver en Radiopaedia ↗</a></div>`;
+  }
+  return h;
+}
+function vistaContexto(){
+  let h='<h2 class="sec">El contexto manda</h2><p class="lead">La misma imagen, distinta historia, distinto diagnóstico. Esta sección es el corazón del tórax: entrena leer la clínica junto a la imagen.</p>';
+  for(const c of CONTEXTOS){
+    h+=`<div class="ctx"><div class="cab"><h4>${esc(c.patron)}</h4><span>${esc(c.nota)}</span></div><table>`;
+    for(const e of c.esc)
+      h+=`<tr><td class="h">${esc(e.h)}</td><td class="d">${esc(e.dx)}</td><td class="p">${esc(e.p)}</td></tr>`;
+    h+='</table></div>';
+  }
+  return h;
+}
+function vistaDistribucion(){
+  let h='<h2 class="sec">Distribución</h2><p class="lead">En tórax, DÓNDE está la lesión suele valer más que cómo es. Estas tres tablas resuelven la mayoría de los casos.</p>';
+  for(const d of DISTRIBUCION){
+    h+=`<h3>${esc(d.t)}</h3><table class="t"><tr>${d.cols.map(x=>`<th>${esc(x)}</th>`).join('')}</tr>`;
+    for(const f of d.filas) h+=`<tr>${f.map(x=>`<td>${esc(x)}</td>`).join('')}</tr>`;
+    h+='</table>';
+  }
+  return h;
+}
+function vistaRX(){
+  let h='<h2 class="sec">RX de tórax: localizar la lesión</h2><p class="lead">El signo de la silueta y los patrones de colapso convierten una placa en una localización anatómica.</p>';
+  h+='<h3>Signo de la silueta: qué se borra → dónde está</h3><table class="t"><tr><th>Estructura borrada</th><th>Localización de la lesión</th></tr>';
+  for(const f of SILUETA) h+=`<tr><td>${esc(f[0])}</td><td>${esc(f[1])}</td></tr>`;
+  h+='</table><h3>Colapsos lobares</h3><table class="t"><tr><th>Lóbulo</th><th>Cómo se ve</th></tr>';
+  for(const f of COLAPSOS) h+=`<tr><td>${esc(f[0])}</td><td>${esc(f[1])}</td></tr>`;
+  h+='</table>';
+  h+=`<div class="ciegas"><h4>⚠ Zonas ciegas — repásalas siempre</h4><p>${esc(ZONAS_CIEGAS)}</p></div>`;
+  h+='<p class="lead">En el adulto, todo colapso lobar obliga a descartar una masa endobronquial: busca el hilio y valora TC.</p>';
+  return h;
+}
+function vistaSistematica(){
+  let h='<h2 class="sec">Sistemática de lectura</h2><p class="lead">Cuando estés cansado, la sistemática es lo único que te salva. Léela en voz baja hasta que sea automática.</p>';
+  h+='<h3>Radiografía de tórax</h3><ul class="chk">'+SIST_RX.map(x=>`<li>${x}</li>`).join('')+'</ul>';
+  h+='<h3>TC de tórax</h3><ul class="chk">'+SIST_TC.map(x=>`<li>${x}</li>`).join('')+'</ul>';
+  h+=`<div class="ciegas"><h4>⚠ Segunda pasada</h4><p>El error clásico del residente no es no saber: es dejar de mirar tras el primer hallazgo. Encuentra algo → vuelve a empezar la sistemática.</p></div>`;
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// QUIZ con repetición espaciada (mismo motor que el banco de signos)
+// ═══════════════════════════════════════════════════════════════════════════
+const SRS_KEY='torax_srs_v1', DIAQ_KEY='torax_dia_v1';
+const DIA=86400000, ESCALA=[1,3,7,16,35,70];
+let SRS={}; try{ SRS=JSON.parse(localStorage.getItem(SRS_KEY)||'{}'); }catch(e){}
+function persistir(){ try{ localStorage.setItem(SRS_KEY,JSON.stringify(SRS)); }catch(e){} }
+function claveDia(d){ d=d||new Date(); return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
+function hechosHoy(){ try{ const r=JSON.parse(localStorage.getItem(DIAQ_KEY)||'{}');
+  return r.d===claveDia()?(r.n||0):0; }catch(e){ return 0; } }
+function registrarHecho(){ try{ const hoy=claveDia(); let r=JSON.parse(localStorage.getItem(DIAQ_KEY)||'{}');
+  if(r.d!==hoy) r={d:hoy,n:0}; r.n=(r.n||0)+1; localStorage.setItem(DIAQ_KEY,JSON.stringify(r)); }catch(e){} }
+function limiteQ(){ const el=document.getElementById('qLim'); return Math.max(1,parseInt(el?el.value:12)||12); }
+function restanQ(){ return Math.max(0, limiteQ()-hechosHoy()); }
+function nivelTras(g,n){ if(g==='otra') return 0; if(g==='dificil') return Math.max(0,n-1);
+  if(g==='bien') return Math.min(ESCALA.length-1,n+1); return Math.min(ESCALA.length-1,n+2); }
+
+// Baraja de preguntas: patrones + escenarios clínicos
+function baraja(){
+  const cartas=[];
+  for(const p of PATRONES) cartas.push({id:'p:'+p[0], tipo:'patrón',
+    preg:p[0], hist:'', resp:'<div class="b">Qué es</div><p>'+esc(p[1])+'</p>'+
+    '<div class="b">Distribución</div><p>'+esc(p[2])+'</p>'+
+    '<div class="b">Diferencial</div><p>'+esc(p[3])+'</p>'});
+  for(const c of CONTEXTOS) for(let k=0;k<c.esc.length;k++){ const e=c.esc[k];
+    cartas.push({id:'c:'+c.patron+'|'+k, tipo:'contexto', preg:c.patron, hist:e.h,
+      resp:'<div class="b">Diagnóstico más probable</div><p><b>'+esc(e.dx)+'</b></p>'+
+           '<div class="b">Qué lo discrimina</div><p>'+esc(e.p)+'</p>'}); }
+  return cartas;
+}
+const CARTAS=baraja();
+function esNuevoQ(c){ return !SRS[c.id]; }
+function vencidoQ(c){ const e=SRS[c.id]; return !!(e&&e.p<=Date.now()); }
+function barajar(a){ for(let k=a.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
+
+let mazo=[], idx=0, revelado=false;
+function vistaQuizShell(){
+  return `<h2 class="sec">Quiz de tórax</h2>
+  <p class="lead">Preguntas de patrón y, sobre todo, de contexto clínico. Con repetición espaciada: lo que fallas vuelve antes.</p>
+  <div class="barra">
+    <span><label>Tipo</label><select id="qTipo" onchange="nuevaTanda()">
+      <option value="">todo</option><option value="contexto">solo contexto clínico</option><option value="patrón">solo patrones</option>
+    </select></span>
+    <span><label>Tanda</label><select id="qTanda" onchange="nuevaTanda()">
+      <option value="hoy">repaso de hoy</option><option value="todos">todas (sin límite)</option>
+    </select></span>
+    <span><label>Límite/día</label><input type="number" id="qLim" min="1" value="12" style="width:56px" onchange="nuevaTanda()"></span>
+    <span class="prog">Pregunta <b id="qIdx">0</b>/<b id="qTot">0</b> · hoy <b id="qHoy">0</b> · dominadas <b id="qDom">0</b></span>
+  </div>
+  <div id="qCarta"></div>
+  <p class="atajos">Atajos · <b>Espacio</b> mostrar · <b>1</b> otra vez · <b>2</b> difícil · <b>3</b> bien · <b>4</b> fácil</p>`;
+}
+function nuevaTanda(){
+  const tipo=document.getElementById('qTipo').value;
+  const tanda=document.getElementById('qTanda').value;
+  let base=CARTAS.filter(c=>!tipo||c.tipo===tipo);
+  if(tanda==='hoy') mazo=barajar(base.filter(vencidoQ)).concat(barajar(base.filter(esNuevoQ))).slice(0,restanQ());
+  else mazo=barajar(base.slice());
+  idx=0; revelado=false; pintaCarta();
+}
+function pintaCarta(){
+  const z=document.getElementById('qCarta'); if(!z) return;
+  const tipo=document.getElementById('qTipo').value;
+  const base=CARTAS.filter(c=>!tipo||c.tipo===tipo);
+  document.getElementById('qIdx').textContent=Math.min(idx+1,mazo.length);
+  document.getElementById('qTot').textContent=mazo.length;
+  document.getElementById('qHoy').textContent=hechosHoy()+'/'+limiteQ();
+  document.getElementById('qDom').textContent=base.filter(c=>SRS[c.id]&&SRS[c.id].n>=4).length+'/'+base.length;
+  if(!mazo.length){ z.innerHTML='<div class="tapado">'+(restanQ()<=0
+    ? '¡Cupo de hoy hecho! 🎯 Vuelve mañana o cambia la tanda a «todas».'
+    : 'Nada pendiente con estos filtros. ¡Al día!')+'</div>'; return; }
+  if(idx>=mazo.length){ z.innerHTML=`<div class="carta" style="text-align:center">
+    <div class="preg">Tanda completada 🎯</div><p class="marca">Has repasado ${mazo.length} pregunta(s).</p>
+    <div class="acciones" style="justify-content:center"><button class="btn" onclick="nuevaTanda()">Otra tanda</button></div></div>`; return; }
+  const c=mazo[idx], e=SRS[c.id];
+  let h=`<div class="carta"><div class="etq">${c.tipo==='contexto'?'Mismo patrón, ¿qué historia?':'Patrón'}
+    <span class="chip">${esc(c.tipo)}</span>${e?'<span class="chip">nivel '+e.n+'</span>':'<span class="chip">nueva</span>'}</div>
+    <div class="preg">${esc(c.preg)}</div>`;
+  if(c.hist) h+=`<div class="hist"><b>Historia:</b> ${esc(c.hist)}</div>`;
+  if(!revelado){
+    h+=`<div class="tapado">${c.tipo==='contexto'?'¿Cuál es tu primer diagnóstico con ESTA historia?':'Define el patrón y su diferencial.'}</div>
+      <div class="acciones"><button class="btn rev" onclick="mostrarQ()">Mostrar respuesta</button></div>`;
+  }else{
+    h+=`<div class="resp">${c.resp}</div><div class="acciones">
+      <button class="btn sec" style="border-color:var(--rojo);color:var(--rojo)" onclick="calif('otra')">Otra vez (1)</button>
+      <button class="btn sec" style="border-color:var(--ambar);color:var(--ambar)" onclick="calif('dificil')">Difícil (2)</button>
+      <button class="btn sec" onclick="calif('bien')">Bien (3)</button>
+      <button class="btn sec" style="border-color:var(--verde);color:var(--verde)" onclick="calif('facil')">Fácil (4)</button>
+    </div>`;
+  }
+  z.innerHTML=h+'</div>';
+}
+function mostrarQ(){ revelado=true; pintaCarta(); }
+function calif(g){
+  const c=mazo[idx], e=SRS[c.id];
+  const n=nivelTras(g, e?e.n:0);
+  SRS[c.id]={n:n, p:Date.now()+ESCALA[n]*DIA, v:((e&&e.v)||0)+1};
+  persistir();
+  if(g==='otra') mazo.push(c); else registrarHecho();
+  idx++; revelado=false; pintaCarta();
+}
+document.addEventListener('keydown',ev=>{
+  if(seccion!=='quiz') return;
+  if(/^(input|select|textarea)$/i.test(ev.target.tagName)) return;
+  if(!mazo.length||idx>=mazo.length) return;
+  if(ev.key===' '){ ev.preventDefault(); if(!revelado) mostrarQ(); }
+  else if(revelado&&ev.key==='1') calif('otra');
+  else if(revelado&&ev.key==='2') calif('dificil');
+  else if(revelado&&ev.key==='3') calif('bien');
+  else if(revelado&&ev.key==='4') calif('facil');
+});
+
+// Arranque: recuerda la última sección
+try{ const s=localStorage.getItem('torax_seccion');
+  if(s&&SECCIONES.some(x=>x[0]===s)) seccion=s; }catch(e){}
+renderNav(); render();
+</script>
+</body>
+</html>

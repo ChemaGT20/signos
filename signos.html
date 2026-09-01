@@ -74,6 +74,7 @@
       <select id="fModo" onchange="nuevaSesion()">
         <option value="directo">nombre → qué es</option>
         <option value="inverso">descripción → nombre</option>
+        <option value="pasivo">repaso pasivo (solo leer) 😴</option>
       </select></span>
     <span><label>Tanda</label>
       <select id="fTanda" onchange="nuevaSesion()">
@@ -272,6 +273,35 @@ const SIGNOS=[
 ['Signo del algodón (cotton wool)','MSK','RX','Áreas escleróticas algodonosas en el cráneo.','Enfermedad de Paget (fase mixta).'],
 ['Tibia en sable','MSK','RX','Arqueamiento anterior de una tibia engrosada.','Enfermedad de Paget (o sífilis).'],
 ['Signo de Wimberger','MSK','RX','Erosión de la esquina metafisaria con anillo epifisario denso.','Escorbuto (también sífilis congénita).'],
+// ── 4ª tanda ─────────────────────────────────────────────────────────────────
+// ── Mama ──
+['Calcificaciones pleomorfas agrupadas','Mama','Mamografía','Microcalcificaciones finas de tamaño y forma variables, en grupo.','Sospechosas de malignidad (carcinoma ductal in situ): BI-RADS 4-5, biopsia.'],
+['Calcificaciones en cáscara de huevo','Mama','Mamografía','Calcificaciones curvilíneas finas en la pared de una lesión redondeada.','Benignas: necrosis grasa o quiste oleoso.'],
+['Calcificaciones en palomitas','Mama','Mamografía','Calcificaciones groseras "en palomita de maíz".','Fibroadenoma involutivo (benigno).'],
+['Calcificaciones vasculares en raíl','Mama','Mamografía','Dos líneas paralelas calcificadas (railroad track).','Calcificación de arterias mamarias: benigna.'],
+['Leche de calcio (teacup)','Mama','Mamografía','Calcio que sedimenta en microquistes: semiluna en la proyección de perfil (taza de té).','Quistes benignos con leche de calcio.'],
+['Distorsión arquitectural','Mama','Mamografía/tomosíntesis','Convergencia de trabéculas hacia un punto sin masa central.','Cicatriz radial o carcinoma: siempre a estudio.'],
+['Ganglio intramamario','Mama','Mamografía/ECO','Nódulo con muesca y centro graso (hilio).','Ganglio linfático benigno (el hilio graso lo confirma).'],
+['Masa espiculada','Mama','Mamografía','Masa de márgenes espiculados que irradian.','Carcinoma hasta que se demuestre lo contrario (BI-RADS 5).'],
+['Signo del halo (mama)','Mama','Mamografía','Halo radiolucente fino rodeando una masa.','Signo de benignidad (quiste, fibroadenoma).'],
+// ── Pediatría ──
+['Muelle enrollado (coiled spring)','Pediatría','enema','Contraste que dibuja pliegues en espiral alrededor de la invaginación.','Invaginación intestinal (y control de su reducción).'],
+['Fractura en esquina metafisaria','Pediatría','RX','Pequeño fragmento en la esquina de la metáfisis (asa de cubo).','Muy específica de maltrato infantil.'],
+['Diana pilórica (target)','Pediatría','ECO','Píloro engrosado en anillos concéntricos, canal alargado.','Estenosis hipertrófica de píloro (músculo >3 mm, longitud >15-17 mm).'],
+['Cráneo en cobre batido','Pediatría','RX','Impresiones digitiformes marcadas en la bóveda craneal.','Hipertensión intracraneal crónica (p. ej. craneosinostosis).'],
+['Metáfisis en copa','Pediatría','RX','Ensanchamiento y ahuecamiento de la metáfisis, con deshilachado.','Raquitismo.'],
+['Líneas de Harris','Pediatría','RX','Líneas transversales densas paralelas a la metáfisis.','Líneas de detención del crecimiento (enfermedad/estrés previo).'],
+// ── Neuro ──
+['Swallow tail ausente','Neuro','RM (SWI)','Pérdida de la morfología en "cola de golondrina" del nigrosoma-1 en la sustancia negra.','Parkinson / parkinsonismo degenerativo.'],
+['T2-FLAIR mismatch','Neuro','RM','Hiperseñal homogénea en T2 con hiposeñal relativa en FLAIR salvo un borde.','Astrocitoma IDH-mutante 1p/19q no codelecionado (bastante específico).'],
+['Signo de la hiedra (ivy sign)','Neuro','RM (FLAIR/CIV)','Realce leptomeníngeo en surcos, como hiedra sobre la piedra.','Enfermedad de moyamoya (colaterales piales lentas).'],
+['Silla turca vacía (empty sella)','Neuro','RM/TC','Silla turca ocupada por LCR con hipófisis aplanada.','Silla turca vacía (suele ser hallazgo; valorar HTIC idiopática si hay clínica).'],
+['Signo del claustrum','Neuro','RM (FLAIR)','Hiperseñal bilateral y simétrica del claustro.','Encefalitis (FIRES, anti-NMDA y otras).'],
+['Muñeco de nieve hipofisario','Neuro','RM/TC','Masa selar y supraselar estrangulada por el diafragma selar (forma de 8).','Macroadenoma hipofisario.'],
+// ── Vascular / abdomen ──
+['Rosario arterial (string of beads)','Vascular','angio/TC','Estenosis y dilataciones alternantes en collar de cuentas.','Displasia fibromuscular (típica en arteria renal y carótida).'],
+['Riñón en herradura','Vascular','TC','Riñones fusionados por sus polos inferiores, cruzando la línea media.','Riñón en herradura (más litiasis, obstrucción y riesgo en trauma).'],
+['Signo del sándwich mesentérico','Abdomen','TC','Vasos y grasa mesentéricos "en sándwich" entre masas de adenopatías.','Linfoma mesentérico.'],
 ];
 
 // Término de búsqueda en INGLÉS para el enlace a Radiopaedia (web en inglés):
@@ -340,7 +370,19 @@ const EN={
 'Triángulo de Codman':'Codman triangle','Rayos de sol (sunburst)':'sunburst periosteal reaction osteosarcoma',
 'Piel de cebolla (onion skin)':'onion skin periosteal reaction Ewing','Fragmento caído (fallen fragment)':'fallen fragment sign',
 'Vértebra en marco (picture frame)':'picture frame vertebra Paget','Signo del algodón (cotton wool)':'cotton wool skull Paget',
-'Tibia en sable':'sabre tibia','Signo de Wimberger':'Wimberger sign'
+'Tibia en sable':'sabre tibia','Signo de Wimberger':'Wimberger sign',
+'Calcificaciones pleomorfas agrupadas':'pleomorphic calcifications breast','Calcificaciones en cáscara de huevo':'eggshell calcification breast',
+'Calcificaciones en palomitas':'popcorn calcification fibroadenoma','Calcificaciones vasculares en raíl':'vascular calcifications breast',
+'Leche de calcio (teacup)':'milk of calcium teacup breast','Distorsión arquitectural':'architectural distortion breast',
+'Ganglio intramamario':'intramammary lymph node','Masa espiculada':'spiculated mass breast','Signo del halo (mama)':'halo sign breast',
+'Muelle enrollado (coiled spring)':'coiled spring sign intussusception','Fractura en esquina metafisaria':'classic metaphyseal lesion child abuse',
+'Diana pilórica (target)':'target sign pyloric stenosis','Cráneo en cobre batido':'copper beaten skull',
+'Metáfisis en copa':'cupping fraying metaphysis rickets','Líneas de Harris':'Harris growth arrest lines',
+'Swallow tail ausente':'swallow tail sign nigrosome parkinson','T2-FLAIR mismatch':'T2 FLAIR mismatch sign',
+'Signo de la hiedra (ivy sign)':'ivy sign moyamoya','Silla turca vacía (empty sella)':'empty sella',
+'Signo del claustrum':'claustrum sign encephalitis','Muñeco de nieve hipofisario':'snowman sign pituitary macroadenoma',
+'Rosario arterial (string of beads)':'string of beads fibromuscular dysplasia','Riñón en herradura':'horseshoe kidney',
+'Signo del sándwich mesentérico':'sandwich sign mesenteric lymphoma'
 };
 function radioTerm(nombre){ return EN[nombre]||nombre; }
 
@@ -394,6 +436,23 @@ function registrarHecho(){
   try{ const hoy=claveDia(); let r=JSON.parse(localStorage.getItem(DIA_KEY)||'{}');
     if(r.d!==hoy) r={d:hoy,hechos:0};
     r.hechos=(r.hechos||0)+1; localStorage.setItem(DIA_KEY, JSON.stringify(r)); }catch(e){}
+  registrarDiaActivo();
+}
+// Historial de días con actividad → racha (motiva la constancia)
+const DIAS_KEY='signos_dias_v1';
+function registrarDiaActivo(){
+  try{ const hoy=claveDia(); let a=JSON.parse(localStorage.getItem(DIAS_KEY)||'[]');
+    if(!a.includes(hoy)){ a.push(hoy); if(a.length>150) a=a.slice(-150);
+      localStorage.setItem(DIAS_KEY, JSON.stringify(a)); } }catch(e){}
+}
+function rachaSignos(){
+  try{ const a=new Set(JSON.parse(localStorage.getItem(DIAS_KEY)||'[]'));
+    if(!a.size) return 0;
+    let d=new Date(), n=0;
+    if(!a.has(claveDia(d))) d=new Date(d.getTime()-86400000);   // hoy aún no rompe la racha
+    while(a.has(claveDia(d))){ n++; d=new Date(d.getTime()-86400000); }
+    return n;
+  }catch(e){ return 0; }
 }
 function limiteDiario(){ return Math.max(1, parseInt(document.getElementById('fLimite').value)||12); }
 function restanHoy(){ return Math.max(0, limiteDiario()-hechosHoy()); }
@@ -416,13 +475,17 @@ function cargarFiltros(){
     if(f.tanda) document.getElementById('fTanda').value=f.tanda;
     if(f.limite) document.getElementById('fLimite').value=f.limite;
   }catch(e){}
+  // el portal puede abrir directo en modo pasivo (saliente de guardia): ?pasivo
+  if(/[?&]pasivo/.test(location.search)) document.getElementById('fModo').value='pasivo';
 }
 function nuevaSesion(){
   guardarFiltros();
   const reg=document.getElementById('fReg').value;
   const tanda=document.getElementById('fTanda').value;
+  const modo=document.getElementById('fModo').value;
   const base=SIGNOS.filter(s=>!reg||s[1]===reg);
-  if(tanda==='hoy'){
+  if(modo==='pasivo') mazo=barajar(base.slice());   // solo leer: todos, sin cupo ni SRS
+  else if(tanda==='hoy'){
     // repasos vencidos primero, luego nuevos, recortado al cupo que queda hoy
     const cola=barajar(base.filter(vencido)).concat(barajar(base.filter(esNuevo)));
     mazo=cola.slice(0, restanHoy());
@@ -447,7 +510,8 @@ function render(){
     return;
   }
   if(i>=mazo.length){
-    const esHoy=document.getElementById('fTanda').value==='hoy';
+    // en modo pasivo no hay cupo ni tanda: mensaje neutro
+    const esHoy=document.getElementById('fModo').value!=='pasivo' && document.getElementById('fTanda').value==='hoy';
     const sinCupo=esHoy && restanHoy()<=0;
     zona.innerHTML=`<div class="carta" style="text-align:center"><div class="pregunta">${esHoy?'¡Cupo de hoy hecho! 🎯':'Tanda completada'}</div>
       <p style="color:var(--gris)">${esHoy?'Has hecho tus '+limiteDiario()+' signos de hoy. Los intervalos siguen creciendo: vuelve mañana.':'Has pasado los '+mazo.length+' signos de esta tanda.'}</p>
@@ -459,6 +523,23 @@ function render(){
   const s=mazo[i];
   const modo=document.getElementById('fModo').value;
   const e=SRS[s[0]];
+  // MODO PASIVO (saliente de guardia / cansado): solo leer, todo desplegado,
+  // sin decidir ni calificar. No toca el progreso ni el cupo diario.
+  if(modo==='pasivo'){
+    zona.innerHTML=`<div class="carta">
+      <div class="etq">repaso pasivo · solo leer 😴 <span class="chip">${esc(s[1])}</span><span class="chip">${esc(s[2])}</span></div>
+      <div class="pregunta">${esc(s[0])}</div>
+      <div class="respuesta">
+        <div class="b">Qué se ve</div><p>${esc(s[3])}</p>
+        <div class="b">Qué significa</div><p>${esc(s[4])}</p>
+        <a href="https://radiopaedia.org/search?q=${encodeURIComponent(radioTerm(s[0]))}&scope=cases" target="_blank" rel="noopener"
+           style="font-size:12px;color:var(--ambar)">ver imágenes en Radiopaedia ↗</a></div>
+      <div class="acciones"><button class="btn rev" onclick="ir(1)">Siguiente ›</button>
+        <span class="marca">no cuenta para tu progreso: es solo para leer sin esfuerzo</span></div>
+    </div>`;
+    document.getElementById('btnPrev').disabled=(i===0);
+    return;
+  }
   const pregunta = modo==='directo' ? s[0] : s[3];
   let h=`<div class="carta">
     <div class="etq">${modo==='directo'?'¿Qué es y qué significa?':'¿Qué signo es?'}
@@ -505,7 +586,8 @@ function actualizarProgreso(){
   const base=SIGNOS.filter(s=>!reg||s[1]===reg);
   document.getElementById('pIdx').textContent=Math.min(i+1,mazo.length);
   document.getElementById('pTot').textContent=mazo.length;
-  document.getElementById('pHoy').textContent=hechosHoy()+'/'+limiteDiario();
+  const r=rachaSignos();
+  document.getElementById('pHoy').textContent=hechosHoy()+'/'+limiteDiario()+(r>=2?' · 🔥'+r:'');
   document.getElementById('pVenc').textContent=base.filter(vencido).length;
   document.getElementById('pNuev').textContent=base.filter(esNuevo).length;
   document.getElementById('pDom').textContent=base.filter(dominado).length+'/'+base.length;
@@ -613,6 +695,12 @@ cargarFiltros();   // restaura región/modo/tanda de la visita anterior
 document.addEventListener('keydown',ev=>{
   if(/^(input|select|textarea)$/i.test(ev.target.tagName)) return;
   if(enLista) return;
+  const pasivo=document.getElementById('fModo').value==='pasivo';
+  if(pasivo){   // solo pasar páginas; nunca calificar
+    if(ev.key===' '||ev.key==='ArrowRight'){ ev.preventDefault(); ir(1); }
+    else if(ev.key==='ArrowLeft') ir(-1);
+    return;
+  }
   if(ev.key===' '){ ev.preventDefault(); if(!mostrado && i<mazo.length) mostrar(); }
   else if(ev.key==='ArrowRight') ir(1);
   else if(ev.key==='ArrowLeft') ir(-1);

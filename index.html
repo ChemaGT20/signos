@@ -14,19 +14,22 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
     background:var(--hueso);color:var(--tinta);line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;}
-  header{border-bottom:1.5px solid var(--tinta);padding:26px 22px 20px;text-align:center}
+  header{border-bottom:1.5px solid var(--tinta);padding:26px 22px 18px;text-align:center}
   header h1{font-size:26px;font-weight:600;letter-spacing:-.01em}
   header .sub{font-size:13px;color:var(--gris);margin-top:4px}
-  .wrap{max-width:640px;margin:0 auto;padding:24px 20px}
+  .estado{max-width:640px;margin:14px auto 0;padding:0 20px;text-align:center;font-size:14px;color:var(--tinta)}
+  .estado .racha{color:var(--ambar);font-weight:700}
+  .wrap{max-width:640px;margin:0 auto;padding:20px}
   a.card{display:block;text-decoration:none;color:var(--tinta);background:var(--papel);
-    border:1px solid var(--linea);border-radius:12px;padding:22px;margin-bottom:16px;transition:.15s;border-left:3px solid var(--ambar)}
+    border:1px solid var(--linea);border-radius:12px;padding:20px;margin-bottom:14px;transition:.15s;border-left:3px solid var(--ambar)}
   a.card:active,a.card:hover{border-color:var(--ambar);box-shadow:0 6px 18px rgba(26,34,56,.08)}
+  a.card.saliente{border-left-color:var(--gris);background:#efece6}
   a.card .emoji{font-size:26px;float:right;opacity:.85}
   a.card h2{font-size:19px;margin-bottom:4px}
   a.card p{font-size:14px;color:var(--gris);margin:0}
   a.card .badge{display:inline-block;margin-top:10px;font-size:13px;color:var(--verde);font-weight:600}
   a.card .badge.rep{color:var(--ambar)}
-  .hint{text-align:center;font-size:12px;color:var(--gris);margin-top:20px;line-height:1.6}
+  .hint{text-align:center;font-size:12px;color:var(--gris);margin-top:18px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -34,12 +37,24 @@
   <h1>Radiomática</h1>
   <div class="sub">Repaso de bolsillo · offline · en tu dispositivo</div>
 </header>
+<div class="estado" id="estado"></div>
 <div class="wrap">
   <a class="card" href="signos.html">
     <span class="emoji">📖</span>
     <h2>Banco de signos</h2>
-    <p>~130 signos radiológicos clásicos con repetición espaciada tipo Anki y enlace a Radiopaedia.</p>
+    <p>~150 signos radiológicos clásicos con repetición espaciada tipo Anki y enlace a Radiopaedia.</p>
     <div class="badge" id="bSignos"></div>
+  </a>
+  <a class="card saliente" href="signos.html?pasivo">
+    <span class="emoji">😴</span>
+    <h2>Modo saliente de guardia</h2>
+    <p>¿Cansado, sin fuerzas para decidir? Pasa signos <b>solo leyendo</b>, sin puntuar ni presión. Mantener la costumbre cuenta más que el esfuerzo.</p>
+  </a>
+  <a class="card" href="torax.html">
+    <span class="emoji">🫁</span>
+    <h2>Semiología torácica</h2>
+    <p>Patrones de TC, el diferencial según la historia clínica, distribución, RX y sistemática. Con quiz.</p>
+    <div class="badge" id="bTorax"></div>
   </a>
   <a class="card" href="criterios.html">
     <span class="emoji">🧮</span>
@@ -51,6 +66,42 @@
 </div>
 <script>
 (function(){
+  const claveDia=d=>{d=d||new Date();return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();};
+  function rachaSignos(){
+    try{ const a=new Set(JSON.parse(localStorage.getItem('signos_dias_v1')||'[]'));
+      if(!a.size) return 0;
+      let d=new Date(), n=0;
+      if(!a.has(claveDia(d))) d=new Date(d.getTime()-86400000);
+      while(a.has(claveDia(d))){ n++; d=new Date(d.getTime()-86400000); }
+      return n;
+    }catch(e){ return 0; }
+  }
+  function hechosHoy(){
+    try{ const r=JSON.parse(localStorage.getItem('signos_dia_v1')||'{}');
+      return r.d===claveDia()? (r.hechos||0) : 0; }catch(e){ return 0; }
+  }
+  // Estado del día (motivación)
+  try{
+    const racha=rachaSignos(), hoy=hechosHoy();
+    const el=document.getElementById('estado');
+    const hora=new Date().getHours();
+    const saludo = hora<6?'Buena guardia' : hora<14?'Buenos días' : hora<21?'Buenas tardes' : 'Buenas noches';
+    let s=saludo+', Chema.';
+    if(racha>=2) s+=' <span class="racha">🔥 '+racha+' días seguidos</span> — no la rompas hoy.';
+    else if(hoy>0) s+=' Ya has hecho algo hoy ✓ — vas bien.';
+    else s+=' Un ratito hoy y empiezas racha.';
+    el.innerHTML=s;
+  }catch(e){}
+  // Badge de tórax
+  try{
+    const srs=JSON.parse(localStorage.getItem('torax_srs_v1')||'{}');
+    const venc=Object.values(srs).filter(e=>e&&e.p&&e.p<=Date.now()).length;
+    const el=document.getElementById('bTorax');
+    if(!Object.keys(srs).length) el.textContent='tu rotación actual — empieza aquí';
+    else if(venc){ el.textContent=venc+' pregunta(s) para repasar hoy'; el.classList.add('rep'); }
+    else el.textContent='tórax al día ✓';
+  }catch(e){}
+  // Badge de signos vencidos
   try{
     const srs=JSON.parse(localStorage.getItem('signos_srs_v1')||'{}');
     const ahora=Date.now();
