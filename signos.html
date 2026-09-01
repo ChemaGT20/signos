@@ -76,6 +76,12 @@
         <option value="inverso">descripción → nombre</option>
         <option value="pasivo">repaso pasivo (solo leer) 😴</option>
       </select></span>
+    <span><label>Nivel</label>
+      <select id="fNivel" onchange="nuevaSesion()" title="Filtra por impacto en la práctica. Los nuevos salen siempre primero los esenciales.">
+        <option value="">todos</option>
+        <option value="1">solo esenciales</option>
+        <option value="2">esencial + importante</option>
+      </select></span>
     <span><label>Tanda</label>
       <select id="fTanda" onchange="nuevaSesion()">
         <option value="hoy">repaso de hoy</option>
@@ -87,7 +93,7 @@
     <button class="btn sec peq" onclick="document.getElementById('impSignos').click()">⬆ importar</button>
     <button class="btn sec peq" onclick="toggleSync()" title="Copia un código de texto en un dispositivo y pégalo en el otro: la forma fácil de llevar el progreso entre móvil y ordenador">Sync 📲</button>
     <input type="file" id="impSignos" accept=".json" class="oculto">
-    <span class="progreso">Signo <b id="pIdx">0</b>/<b id="pTot">0</b> · hoy <b id="pHoy">0</b> · vencidos <b id="pVenc">0</b> · nuevos <b id="pNuev">0</b> · dominados <b id="pDom">0</b></span>
+    <span class="progreso">Signo <b id="pIdx">0</b>/<b id="pTot">0</b> · hoy <b id="pHoy">0</b> · vencidos <b id="pVenc">0</b> · nuevos <b id="pNuev">0</b> · esenciales <b id="pEsen">0</b> · dominados <b id="pDom">0</b></span>
   </div>
 
   <div id="panelSync" class="oculto" style="background:var(--papel);border:1px solid var(--linea);border-radius:8px;padding:14px 16px;margin-bottom:18px;font-size:13px">
@@ -116,8 +122,10 @@
     (intervalos de 1 → 3 → 7 → 16 → 35 → 70 días). «Otra vez» lo devuelve al final de la
     tanda actual; «Fácil» salta un nivel. La tanda «repaso de hoy» trae los vencidos y
     algunos nuevos <b>hasta tu «Límite/día»</b> (por defecto 12): así lo aprendes poco a
-    poco en vez de todos de golpe. Sube el límite cuando quieras, o usa «todos» para repasar
-    sin tope. El progreso se guarda en este navegador; usa «⬇ copia» de vez en cuando
+    poco en vez de todos de golpe. Los nuevos aparecen por <b>impacto en la práctica</b>:
+    primero los <b>esenciales</b> de guardia, luego los importantes y al final las «finuras»
+    (con «Nivel» puedes centrarte solo en lo esencial). Sube el límite cuando quieras, o usa
+    «todos» para repasar sin tope. El progreso se guarda en este navegador; usa «⬇ copia» de vez en cuando
     (en iPhone, Safari puede borrar los datos de webs que no visitas en ~una semana).
     Descripciones orientativas de estudio: contrasta siempre con tus textos de referencia
     (Radiopaedia tiene entrada dedicada de casi todos, con imágenes de ejemplo).
@@ -386,6 +394,43 @@ const EN={
 };
 function radioTerm(nombre){ return EN[nombre]||nombre; }
 
+// ── Prioridad docente: los NUEVOS se aprenden por impacto en la guardia ───────
+// P1 esenciales (no puedes no reconocerlos) → P2 importantes → P3 finuras (raros).
+// Solo se listan P1 y P3; el resto es P2. Ampliable/editable.
+const P1=new Set([
+ 'Signo de la silueta','Broncograma aéreo','Líneas B de Kerley','Joroba de Hampton',
+ 'Signo del surco profundo','Signo del menisco pleural','Signo del diafragma continuo',
+ 'Signo de Rigler (doble pared)','Signo del grano de café','Signo del remolino (whirl)',
+ 'Signo de la diana / donut','Media luna hiperdensa en AAA','Aorta drapeada',
+ 'Neumatosis + gas portal','Murphy ecográfico','Signo WES (wall-echo-shadow)',
+ 'Signo de las heces en intestino delgado','Signo del blanco/diana en apendicitis',
+ 'ACM hiperdensa','Pérdida del ribete insular','Signo del delta vacío',
+ 'Signo del riñón/haba en hematoma','Signo de la lente biconvexa','Signo del remolino en hematoma',
+ 'Signo de la vela (almohadilla grasa)','Fractura de Segond','Signo de la almohadilla grasa (codo)',
+ 'Signo de la semiluna subcondral','Signo del pico de loro / doble luz',
+ 'Signo del pulgar (thumbprint)','Signo del campanario (steeple)','Signo de la doble burbuja',
+ 'Signo de la escalera (stepladder)','Signo de la manzana mordida (apple core)',
+ 'Masa espiculada','Calcificaciones pleomorfas agrupadas','Signo de la garra (claw sign)'
+]);
+const P3=new Set([
+ 'Signo del ojo de tigre','Signo del colibrí / pingüino','Signo de la oreja de Mickey Mouse',
+ 'Signo del diente de molar (molar tooth)','Signo de la cruz pontina (hot cross bun)',
+ 'Signo del claustrum','Swallow tail ausente','T2-FLAIR mismatch','Signo de la hiedra (ivy sign)',
+ 'Signo del pulvinar / palo de hockey','Signo de la cinta cortical (cortical ribboning)',
+ 'Tormenta de nieve','Huevo colgado de un hilo (egg on a string)','Signo del muñeco de nieve / 8',
+ 'Corazón en zueco (coeur en sabot)','Muescas costales de Roesler','Muñeco de nieve hipofisario',
+ 'Cráneo en cobre batido','Signo de Wimberger','Tibia en sable','Signo del algodón (cotton wool)',
+ 'Signo de la vértebra en H','Rosario arterial (string of beads)','Líneas de Harris',
+ 'Metáfisis en copa','Vértebra en marco (picture frame)','Signo del reloj de arena',
+ 'Signo del molino de viento / target','Silla turca vacía (empty sella)'
+]);
+function prioridad(s){ const n=s[0]; return P1.has(n)?1 : P3.has(n)?3 : 2; }
+function etiquetaPrioridad(s){ const p=prioridad(s); return p===1?'esencial':p===3?'finura':''; }
+function chipPrioridad(s){ const p=prioridad(s);
+  return p===1?'<span class="chip" style="border-color:var(--verde);color:var(--verde)">esencial</span>'
+       : p===3?'<span class="chip" style="color:var(--gris)">finura</span>' : ''; }
+function ordenPrioridad(arr){ return arr.slice().sort((a,b)=>prioridad(a)-prioridad(b)); }
+
 // ── Estado: repetición espaciada tipo Anki ───────────────────────────────────
 // Por signo: {n: nivel 0-5, p: timestamp del próximo repaso, v: veces visto}.
 // Calificas cada carta (Otra vez / Difícil / Bien / Fácil) y el intervalo
@@ -464,6 +509,7 @@ function guardarFiltros(){
     reg:document.getElementById('fReg').value,
     modo:document.getElementById('fModo').value,
     tanda:document.getElementById('fTanda').value,
+    nivel:document.getElementById('fNivel').value,
     limite:limiteDiario()})); }catch(e){}
 }
 function cargarFiltros(){
@@ -473,6 +519,7 @@ function cargarFiltros(){
       document.getElementById('fReg').value=f.reg;
     if(f.modo) document.getElementById('fModo').value=f.modo;
     if(f.tanda) document.getElementById('fTanda').value=f.tanda;
+    if(f.nivel!=null) document.getElementById('fNivel').value=f.nivel;
     if(f.limite) document.getElementById('fLimite').value=f.limite;
   }catch(e){}
   // el portal puede abrir directo en modo pasivo (saliente de guardia): ?pasivo
@@ -483,11 +530,14 @@ function nuevaSesion(){
   const reg=document.getElementById('fReg').value;
   const tanda=document.getElementById('fTanda').value;
   const modo=document.getElementById('fModo').value;
-  const base=SIGNOS.filter(s=>!reg||s[1]===reg);
-  if(modo==='pasivo') mazo=barajar(base.slice());   // solo leer: todos, sin cupo ni SRS
+  const nivel=document.getElementById('fNivel').value;   // '' todos · '1' esenciales · '2' esencial+importante
+  let base=SIGNOS.filter(s=>!reg||s[1]===reg);
+  if(nivel==='1') base=base.filter(s=>prioridad(s)===1);
+  else if(nivel==='2') base=base.filter(s=>prioridad(s)<=2);
+  if(modo==='pasivo') mazo=ordenPrioridad(base);    // leer primero lo importante
   else if(tanda==='hoy'){
-    // repasos vencidos primero, luego nuevos, recortado al cupo que queda hoy
-    const cola=barajar(base.filter(vencido)).concat(barajar(base.filter(esNuevo)));
+    // repasos vencidos primero; los NUEVOS por prioridad (esenciales antes que finuras)
+    const cola=barajar(base.filter(vencido)).concat(ordenPrioridad(base.filter(esNuevo)));
     mazo=cola.slice(0, restanHoy());
   }
   else mazo=barajar(base.slice());   // «todos» = sin límite (repaso/atracón)
@@ -527,7 +577,7 @@ function render(){
   // sin decidir ni calificar. No toca el progreso ni el cupo diario.
   if(modo==='pasivo'){
     zona.innerHTML=`<div class="carta">
-      <div class="etq">repaso pasivo · solo leer 😴 <span class="chip">${esc(s[1])}</span><span class="chip">${esc(s[2])}</span></div>
+      <div class="etq">repaso pasivo · solo leer 😴 <span class="chip">${esc(s[1])}</span><span class="chip">${esc(s[2])}</span>${chipPrioridad(s)}</div>
       <div class="pregunta">${esc(s[0])}</div>
       <div class="respuesta">
         <div class="b">Qué se ve</div><p>${esc(s[3])}</p>
@@ -543,7 +593,7 @@ function render(){
   const pregunta = modo==='directo' ? s[0] : s[3];
   let h=`<div class="carta">
     <div class="etq">${modo==='directo'?'¿Qué es y qué significa?':'¿Qué signo es?'}
-      <span class="chip">${esc(s[1])}</span><span class="chip">${esc(s[2])}</span>
+      <span class="chip">${esc(s[1])}</span><span class="chip">${esc(s[2])}</span>${chipPrioridad(s)}
       ${!e?'<span class="chip">nuevo</span>':'<span class="chip'+(vencido(s)?' rep':'')+'">nivel '+e.n+(vencido(s)?' · vencido':'')+'</span>'}</div>
     <div class="pregunta">${esc(pregunta)}</div>`;
   if(!mostrado){
@@ -590,6 +640,8 @@ function actualizarProgreso(){
   document.getElementById('pHoy').textContent=hechosHoy()+'/'+limiteDiario()+(r>=2?' · 🔥'+r:'');
   document.getElementById('pVenc').textContent=base.filter(vencido).length;
   document.getElementById('pNuev').textContent=base.filter(esNuevo).length;
+  const esen=base.filter(s=>prioridad(s)===1);
+  document.getElementById('pEsen').textContent=esen.filter(dominado).length+'/'+esen.length;
   document.getElementById('pDom').textContent=base.filter(dominado).length+'/'+base.length;
 }
 // Copia de seguridad del progreso (en iPhone, Safari puede borrar los datos de
